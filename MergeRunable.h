@@ -1,24 +1,16 @@
 #ifndef MERGERUNABLE_H
 #define MERGERUNABLE_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <iostream>
-#include <list>
-#include <map>
-
 #include "glog/logging.h"
 #include "json.hpp"
 #include "LibcurClient.h"
+#include "webserver.h"
 
 using json = nlohmann::json;
 
 using namespace std;
 
-extern string AACSTR ,H264STR ,JSONSTR ,MERGESTR ,RELATIVEPATH ,IPPORT;
+//extern string AACSTR ,H264STR ,JSONSTR ,MERGESTR ,RELATIVEPATH ,IPPORT;
 
 class MergeRunable
 {
@@ -27,7 +19,7 @@ public:
     ~MergeRunable();
 
     int run();
-
+	
     std::string getLiveID(){return basePath;}
 
 private:

@@ -1,59 +1,26 @@
-#include <cstdio>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/vfs.h>
-#include <sys/syscall.h>
-
-#include <dirent.h>
-#include <iostream>
-#include <map>
-
+#include "webserver.h"
 #include "glog/logging.h"
 #include "mongoose.h"
-#include "CThreadPool.h"
-#include "MergeRunable.h"
-
 #include "json.hpp"
 #include "LibcurClient.h"
 #include "message_queue.h"
+#include "CThreadPool.h"
+#include "MergeRunable.h"
 
 using json = nlohmann::json;
+using namespace std;
 
-#define CONTENTTYPE "Content-Type: application/x-www-form-urlencoded\r\n"
+std::queue<std::string> mergeParmQueue; //合成参数队列
 
-string  AACSTR = ".aac";
-string  H264STR = ".h264";
-string  JSONSTR = ".json";
-string  MERGESTR = "merge.";
-
-string  RELATIVEPATH= "/home/record_server/recordFile/";
-
-string  IPPORT= "http://192.168.1.205:8080/live/";
-
-string  serverName = "合成服务105";
-
-static const char *s_http_port = "8081";
-
-static int merge_serverId = 0;  //录制服务ID
-
-LibcurClient *m_httpclient, *s_httpclient;
-
-
-typedef pair<int , string> PAIR;
-
-ostream& operator<<(ostream& out, const PAIR& p) 
-{
-  return out << p.first << "\t" << p.second;
-}
+//Http参数信号量
+sem_t bin_sem;
+sem_t bin_blank;
 
 CThreadPool *threadpool;
-pthread_t httpServer_t, httpTime_t;
-int httpSev_flag = 1;
+pthread_t httpServer_t, httpTime_t, mergeManage_t;
+LibcurClient *m_httpclient, *s_httpclient;
 
-int merge_flag = 1; //服务在线状态上传标志
-
-//http监听服务线程处理数据
+//Http处理请求
 void ev_handler(struct mg_connection *nc, int ev, void *ev_data) 
 {
       switch (ev) 
@@ -64,96 +31,165 @@ void ev_handler(struct mg_connection *nc, int ev, void *ev_data)
             mg_sock_addr_to_str(&nc->sa, addr, sizeof(addr),
                           MG_SOCK_STRINGIFY_IP | MG_SOCK_STRINGIFY_PORT);
             break;
-        }
-        case MG_EV_HTTP_REQUEST: 
-        {
-
+         }
+         case MG_EV_HTTP_REQUEST: 
+         {
              struct http_message *hm = (struct http_message *) ev_data;
              char addr[32];
              mg_sock_addr_to_str(&nc->sa, addr, sizeof(addr),
                           MG_SOCK_STRINGIFY_IP | MG_SOCK_STRINGIFY_PORT);
-             printf("%p: %.*s %.*s %.*s\r\n", nc, (int) hm->method.len, hm->method.p,
-             (int) hm->uri.len, hm->uri.p ,(int) hm->body.len, hm->body.p);
-    
+             
              char url[(int)hm->uri.len];
              sprintf(url, "%.*s",(int)hm->uri.len,hm->uri.p);
-
-             printf("get url:%s \n",url);
              LOG(INFO) << "Get Url:"<<url;
    
-             char urls[11];
-             sprintf(urls, "%.*s",11,hm->uri.p);
-
-             int ret = 0;
+             RESCODE ret = RESCODE::NOERROR;
              if(strcmp(url, "/live/merge") == 0)
-             {
-         
-                 printf("start: %s\n" , url);
-             
-                 //处理参数
-                 char parmStr[(int) hm->query_string.len];
-                 sprintf(parmStr, "%.*s",(int) hm->query_string.len,hm->query_string.p);
-          
-                 char liveId[128] = {0};
-                 mg_get_http_var(&hm->query_string, "liveId", liveId, 128);//获取liveID
-
-                 printf("参数2 : %s\n",liveId);
-       
-                 if(strlen(liveId) == 0)
-                 {
-                    printf("%s\n","liveld is empty");
-                    LOG(ERROR)<<"liveld is empty";
-
-                    ret = 3;
-                    goto end;
-                 }
-
-                 string parm = RELATIVEPATH;
-                 parm += liveId;
-
-                 LOG(INFO)<<"获合成参数 livID:"<<liveId;
-                 MergeRunable *taskObj = new MergeRunable(parm);
-                 threadpool->AddTask(taskObj);       
-     }
-     
+             {				 
+				int parmlen = (int)hm->query_string.len;
+                char parmStr[parmlen];
+                sprintf(parmStr, "%.*s",parmlen,hm->query_string.p);		 
+		        printf("url参数长度：%d  %s\n",parmlen ,parmStr);
+              
+                char liveId[parmlen] = {0};
+                mg_get_http_var(&hm->query_string, "liveId", liveId, parmlen);//获取liveID
+				
+                if(0 == strlen(liveId))
+                {         
+                   LOG(ERROR)<<"LIVEID EMPTY";
+                   ret = RESCODE::LIVEID_ERROR;
+                   goto end;
+                }
+                std::string parm = RELATIVEPATH;
+                parm.append(liveId);
+				
+				LOG(INFO)<<"获合成参数 livID:"<<liveId;
+				
+				sem_wait(&bin_blank);  			
+                mergeParmQueue.push(parm);			
+                sem_post(&bin_sem);     
+           }else
+		   {
+			   LOG(ERROR)<<"Methond ERROR";
+			   ret = RESCODE::METHOD_ERROR;
+		   }
   end:
-          char numStr[10] ={};
-          snprintf(numStr, sizeof(numStr), "%d",ret);
+           char numStr[10] ={};
+           snprintf(numStr, sizeof(numStr), "%d",ret);
      
-          //组装json返回值
-          json obj;
-          obj["resCode"] = numStr;
-          std::string resStr = obj.dump();
+           //组装json返回值
+           json obj;
+           obj["resCode"] = numStr;
+           std::string resStr = obj.dump();
 
-          mg_send_response_line(nc, 200,
-                            "Content-Type: text/html\r\n"
-                            "Connection: close");        
-
-          mg_printf(nc,"\r\n%s\r\n",resStr.c_str());
+           mg_send_response_line(nc, 200, "Content-Type: application/json;charset=utf-8\r\n");
+           mg_printf(nc,"\r\n%s\r\n",resStr.c_str());
     
-          nc->flags |= MG_F_SEND_AND_CLOSE;
-
+           nc->flags |= MG_F_SEND_AND_CLOSE;
+           break;
+      }    
+      case MG_EV_CLOSE:
+      {      
          break;
-     }
-    
-    case MG_EV_CLOSE:
-    {
-        
-         printf("%p: Connection closed\r4\n", nc); 
-         break;
-    }
+      }
   }
 }
 
+//处理合成参数 线程
+void *mergeManage_fun(void *data)
+{
+    while(merge_flag)
+    {      
+        sem_wait(&bin_sem); 
+		
+		if(!mergeParmQueue.empty()) //队列非空
+		{	
+             std::string mergeparm = mergeParmQueue.front();
+                
+             LOG(INFO) << "管理线程获取参数 直播ID:"<<mergeparm;
+			 
+			 //新建任务实例，并加入任务队列
+             MergeRunable *taskObj = new MergeRunable(mergeparm);
+             threadpool->AddTask(taskObj);      
 
-//http服务监听线程
+             mergeParmQueue.pop();     
+             sem_post(&bin_blank); 
+        } 
+   }
+   return data;
+}
+
+//解析Http返回json数据
+int parseResdata(string &resdata,  int ret ,PARSE_TYPE m_Type)
+{     
+    if(!resdata.empty())
+    {   
+        json m_object = json::parse(resdata);
+        if(m_object.is_object())
+        {
+            string resCode = m_object.value("code", "oops");
+            ret = atoi(resCode.c_str() );
+            if(0 == ret)
+            {	  
+		        switch(m_Type) 
+                {
+		           case PARSE_TYPE::GETAPI:  //解析获取API接口
+	               {
+			            json data_object = m_object.at("data");
+						
+		                string IP = data_object.value("ip", "oops");
+                        string port = data_object.value("port", "oops");
+                        IpPort = IpPort.append(IP).append(":").append(port);
+
+                        ServerCreate = data_object.value("server_create", "oops");
+                        ServerDelete = data_object.value("server_delete", "oops");
+                        ServerSelect = data_object.value("server_select", "oops");
+                        //ServerUpdate = m_object.value("server_update", "oops");
+
+                        liveUpdate = data_object.value("live_update", "oops");
+                        liveSelect = data_object.value("live_select", "oops");
+                        liveUpload = data_object.value("live_upload", "oops");
+
+                        cout<<IpPort  <<ServerCreate  <<ServerDelete  <<ServerSelect  <<liveUpdate <<endl;	 
+			            break;
+	               }
+			       case PARSE_TYPE::REGISTONLINE:  //解析注册合成服务
+	               {                        
+				       record_serverId = m_object.value("serverId", "oops");
+                       LOG(INFO)<<"录制服务 record_serverId:"<<record_serverId;	
+                       printf("serverID: %s\n", record_serverId.c_str());	
+			           break;
+	               }
+			       case PARSE_TYPE::UPDATA:  //解析定时上传合成在线
+	               {
+					   break;
+	               }	    
+              }			  
+         }else
+         {
+			 LOG(ERROR)<<"接口返回数据异常 ret:"<< ret<<"  错误信息:"<<m_object.value("msg", "oops");
+         }  
+	  }else
+      {
+		  ret = -1;
+          LOG(ERROR)<<" 接口返回数据不完整";
+	  }		   
+   }else
+   {
+	   ret = -2;
+	   LOG(ERROR) << "Http接口返回 数据为空";   
+   }
+   
+   return ret;
+}
+
+//Http服务监听 线程
 void *httpServer_fun(void *pdata)
 {
    struct mg_mgr mgr;
    struct mg_connection *nc;
 
    mg_mgr_init(&mgr, NULL);
-  
    nc = mg_bind(&mgr, s_http_port, ev_handler);
    if (nc == NULL) 
    {
@@ -168,7 +204,6 @@ void *httpServer_fun(void *pdata)
    LOG(INFO) <<"合成服务已启动 on port:"<<s_http_port;
 
    mg_set_protocol_http_websocket(nc);
-
    while(httpSev_flag)
    {    
       mg_mgr_poll(&mgr, 1000);
@@ -176,6 +211,7 @@ void *httpServer_fun(void *pdata)
    return pdata;
 }
 
+//创建日志文件夹
 int CreateLogFileDir(const char *sPathName)  
 {  
       char DirName[256];  
@@ -194,226 +230,202 @@ int CreateLogFileDir(const char *sPathName)
                       printf("mkdir log error\n");  
                       LOG(ERROR)<<"mkdir log error"; 
                       return -1;   
-                  }  
-                 
+                  }             
               }  
               DirName[i] = '/';  
-
           }  
       }  
       return 0;  
 } 
 
-
-//定时上传状态线程
+//定时上传状态 线程
 void *httpTime_fun(void *pdata)
 {
    s_httpclient = new LibcurClient;
 
-   string url = IPPORT;
-   url = url.append("server_update?serverId=");
+   updateOnlineUrl = IpPort;
+   updateOnlineUrl.append("server_update?serverId=");
    char numStr[1024] ={};
    snprintf(numStr, sizeof(numStr), "%d",merge_serverId);
-   url.append(numStr);
-   url.append("&netFlag=20");
-   cout<<"time url:"<<url<<endl;
+   updateOnlineUrl.append(numStr);
+   updateOnlineUrl.append("&netFlag=20");
+   cout<<"updata url:"<<url<<endl;
 
    //录制服务在线状态定时上传
    while(merge_flag)
    {
       sleep(10);
-
-      int main_ret = s_httpclient->HttpGetData(url.c_str());
-      if(main_ret != 0)
+	  
+	  int main_ret = s_httpclient->HttpGetData(updateOnlineUrl.c_str());
+      if(0 == main_ret)
       {
-         LOG(ERROR) << "定时上传服务状态失败 "<<"错误代号:"<<main_ret;  
-
-      }else
-      {
-         json m_object = json::parse(s_httpclient->GetResdata());
-         if(m_object.is_object())
-         {
-             string resCode = m_object.value("code", "oops");
-             main_ret = atoi(resCode.c_str() );
-
-             if(0 != main_ret)
-             {
-                std::cout<<main_ret<<endl;
-                LOG(ERROR) << "定时上传服务状态失败 main_ret:"<< main_ret <<" "<<"错误信息:"<<m_object.at("msg");   
-             }
-         }
-      }
-    }
+		std::string resData = s_httpclient->GetResdata();
+        main_ret = parseResdata(resData, main_ret ,PARSE_TYPE::UPDATA);
+		if(0 != main_ret)
+		{
+		  LOG(ERROR) << "解析定时返回数据失败  main_ret:"<<main_ret; 
+		}
+     }else
+     {
+        //LOG(ERROR) << "调用定时上在线状态接口失败  main_ret:"<<main_ret;  
+     }	
+   }
 
    if(NULL != s_httpclient)
    {
       delete s_httpclient;
       s_httpclient = NULL;
    }
-
-   printf("stop timer\n");
-
    return pdata;
 }
 
+//停止服务
 int stopServer()
 {
+	int main_ret = pthread_join(httpServer_t, NULL);
+    if(0 != main_ret)
+    {
+      printf("http服务线程退出错误  ret:%d" ,main_ret); 
+      LOG(ERROR)<<"http服务线程退出错误  ret:"<<main_ret; 
+    } 
+    return main_ret;
+}
 
-//     int main_ret = 0;
-//     char stopStr[1024] = {0};
+//启动服务
+int startServer()
+{     
+    int main_ret = 0;
+    m_httpclient = new LibcurClient;
+    main_ret = CreateLogFileDir(LOGDIR.c_str());
+    if(0 != main_ret)
+    {
+       LOG(ERROR) << "创建log 文件夹失败"<<" "<<"main_ret:"<<main_ret;
+       return main_ret ;
+    }
 
-// here:
-//    scanf("%s",stopStr);
+    //创建log初始化
+    google::InitGoogleLogging("");
+    google::SetLogDestination(google::GLOG_INFO,"./mergelog/mergeServer-");
+    FLAGS_logbufsecs = 0; //缓冲日志输出，默认为30秒，此处改为立即输出
+    FLAGS_max_log_size = 500; //最大日志大小为 100MB
+    FLAGS_stop_logging_if_full_disk = true; //当磁盘被写满时，停止日志输出
 
-//    if(strcmp("stop",stopStr) == 0)
-//    {
+    //获取Http API 
+    string url = IPPORT;
+    url = url.append("main?ClientID=1001"); 
+    main_ret = m_httpclient->HttpGetData(url.c_str());
+    if(0 == main_ret)
+    {
+	   std::string resData = m_httpclient->GetResdata();
+	   main_ret = parseResdata(resData, main_ret ,PARSE_TYPE::GETAPI);
+	   if(0 != main_ret)
+	   {
+		  LOG(ERROR) << "解析Http API接口 数据失败  main_ret:"<<main_ret; 
+		  return main_ret;
+	   }
+    }else
+    {
+	   LOG(ERROR) << "调用Http API接口失败   main_ret:"<<main_ret;  
+       return main_ret;
+    }
 
-//        httpSev_flag = 0;
-//        main_ret = pthread_join(httpServer_t, NULL);
-//        if(0 != main_ret)
-//        {
-//          printf("http服务线程退出错误  ret:%d" ,main_ret); 
-//          LOG(ERROR)<<"http服务线程退出错误  ret:"<<main_ret; 
-//        } 
+    //注册服务接口  
+	url = IpPort;
+    url.append("server_create?serverType=2&serverName=");
+    url.append(ServerCreate);
+    url.append("?serverName=");
+    char *format = m_httpclient->UrlEncode(serverName);
+    url.append(format);
+    url.append("&serverType=LiveRecord&serverApi=192.168.1.206:");
+    url.append(s_http_port);    
+    url.append(APIStr);
+    
+    main_ret = m_httpclient->HttpGetData(url.c_str());
+    if(0 == main_ret)
+    {
+	   std::string resData = m_httpclient->GetResdata();
+	   main_ret = parseResdata(resData, main_ret ,PARSE_TYPE::REGISTONLINE);
+	   if(0 != main_ret)
+	   {
+		  LOG(ERROR) << "解析注册录制 数据失败 main_ret:"<<main_ret; 
+		  //return main_ret;
+	   }	  
+    }else
+    {  
+       LOG(ERROR) << "调用注册录制服务 失败  main_ret:"<<main_ret;  
+       //return main_ret;
+    }
+  
+    //Http参数信号量初始化
+    main_ret = sem_init(&bin_sem, 0, 0);
+    if(0 != main_ret)
+    {  
+      LOG(ERROR) << "bin_sem创建失败"<<" "<<"main_ret:"<<main_ret;
+      return main_ret ;
+    }
  
-//        LOG(INFO)<<"http服务线程已退出 ret:"<<main_ret; 
+    main_ret = sem_init(&bin_blank, 0, 1000);
+    if(0 != main_ret)
+    {  
+      LOG(ERROR) << "bin_blank创建失败"<<" "<<"main_ret:"<<main_ret;
+      return main_ret ;
+    }
+  
+    //往消息队列里面写数据
+    //int msqid = getMsgQueue();
+    //char numStr[1024] ={0};
+    //snprintf(numStr, sizeof(numStr), "%d",merge_serverId);
+    //sendMsg(msqid, CLIENT_TYPE, numStr);
+  
+    //创建http服务线程  
+    main_ret = pthread_create(&httpServer_t, NULL, httpServer_fun, NULL);
+    if(0 != main_ret)
+    { 
+      printf("http服务监听线程创建失败 ret:%d" ,main_ret); 
+      LOG(ERROR) << "http服务监听线程创建失败"<<" "<<"main_ret:"<<main_ret;
+      return main_ret;   
+    }
+	
+	//创建合成任务管理线程
+    main_ret = pthread_create(&mergeManage_t, NULL, mergeManage_fun, NULL);
+    if(0 != main_ret)
+    { 
+       LOG(ERROR) << "录制管理线程创建失败"<<" "<<"main_ret:"<<main_ret; 
+       return main_ret; 
+    }
 
-//        while(1)
-//        {
-//           if(threadpool->getTaskSize()==0) 
-//           {
-//              if(0 == threadpool->StopAll())
-//              {
-//                 break;
-//              }else
-//              {
-//              	LOG(ERROR)<<"线程池终止所有线程错误!!"; 
-//              } 
-//           }
-//       }  
-      
-//       LOG(INFO)<<"线程池 所有线程已终止!"; 
-//       if(NULL != threadpool)
-//       {
-//          delete threadpool;
-//          threadpool = NULL;
-//       }      
-//       return main_ret;
+    //线程池初始化
+    threadpool = new CThreadPool(10); //线程池大小为10
 
-//    }else
-//    {   
-//        printf("请输入正确的停止命令!\n");
-//        memset(stopStr, 0 ,1024);
-//        goto here;
-//    }
-
-  return 0;
+    //创建定时上传线程
+    main_ret = pthread_create(&httpTime_t,NULL, httpTime_fun, NULL);
+    if(0 != main_ret)
+    {
+       LOG(ERROR) << "http定时上传线程创建失败"<<" "<<"main_ret:"<<main_ret; 
+       return main_ret;   
+    }
+	return main_ret;
 }
 
 int main(int argc, char* argv[]) 
 {
-   int main_ret = 0;
-   m_httpclient = new LibcurClient;
+    printf("monitor_Server :[tid: %ld]\n", syscall(SYS_gettid));
 
-   printf("monitor_Server :[tid: %ld]\n", syscall(SYS_gettid));
+    int main_ret = startServer();
 
-   main_ret = CreateLogFileDir("./mergeLog/");
-   if(0 != main_ret)
-   {
-       LOG(ERROR) << "创建log 文件夹失败"<<" "<<"main_ret:"<<main_ret;
-       return main_ret ;
-   }
-
-   //创建log初始化
-  google::InitGoogleLogging("");
-  google::SetLogDestination(google::GLOG_INFO,"./mergelog/mergeServer-");
-  FLAGS_logbufsecs = 0; //缓冲日志输出，默认为30秒，此处改为立即输出
-  FLAGS_max_log_size = 500; //最大日志大小为 100MB
-  FLAGS_stop_logging_if_full_disk = true; //当磁盘被写满时，停止日志输出
-
-
-   //注册服务接口  
-  string url = IPPORT;
-  url.append("server_create?serverType=2&serverName=");
-  
-  char *format = m_httpclient->UrlEncode(serverName);
-  url.append(format);
-  url.append("&netFlag=1&serverIp=192.168.1.206:8000"); 
-
-  printf("%s\n", url.c_str());
-
-  main_ret = m_httpclient->HttpGetData(url.c_str());
-  if(main_ret != 0)
-  {
-
-    cout<<main_ret<<endl;
-    LOG(ERROR) << "注册录制服务失败:  "<<"错误代号:"<<main_ret;
-    return main_ret;
-
-  }else
-  {
-    std::string res = m_httpclient->GetResdata();
-    printf("777:%s\n", res.c_str());
-    json m_object = json::parse(m_httpclient->GetResdata());
-    if(m_object.is_object())
+    if(0 != main_ret)
     {
-      string resCode = m_object.value("code", "oops");
-      main_ret = atoi(resCode.c_str() );
-
-      if(0 != main_ret)
-      {
-          std::cout<<main_ret<<endl;
-          LOG(ERROR)<<"注册录制服务失败 main_ret:"<< main_ret <<" "<<"错误信息:"<<m_object.at("msg");
-          return main_ret ;
-      }else
-      {
-          merge_serverId = m_object.value("serverId", 0);
-          std::cout<<merge_serverId<<endl;
-      }
-    
+       LOG(INFO) << "server start error:  "<<"main_ret:"<<main_ret;
+       return main_ret;
     }
-  }
- 
-  //往消息队列里面写数据
-  int msqid = getMsgQueue();
-  char numStr[1024] ={0};
-  snprintf(numStr, sizeof(numStr), "%d",merge_serverId);
-  sendMsg(msqid, CLIENT_TYPE, numStr);
 
+    printf("server starting\n");
+    LOG(INFO) << "server start: "<<"main_ret:"<<main_ret;
+   
+    main_ret = stopServer();
 
-  //创建http服务线程  
-  main_ret = pthread_create(&httpServer_t, NULL, httpServer_fun, NULL);
+    printf("合成服务已退出 ret:%d\n" ,main_ret);
+    LOG(INFO) << "合成服务已退出"<<" "<<"main_ret:"<<main_ret;
 
-  if(0 != main_ret)
-  { 
-    printf("http服务监听线程创建失败 ret:%d" ,main_ret); 
-    LOG(ERROR) << "http服务监听线程创建失败"<<" "<<"main_ret:"<<main_ret;
-    return main_ret;   
-  }
-
-  threadpool = new CThreadPool(10); //线程池大小为10
-
-
-   //创建定时上传线程
-   main_ret = pthread_create(&httpTime_t,NULL, httpTime_fun, NULL);
-   if(0 != main_ret)
-   {
-     LOG(ERROR) << "http定时上传线程创建失败"<<" "<<"main_ret:"<<main_ret; 
-     return main_ret;   
-   }
-
-
-  main_ret = pthread_join(httpServer_t, NULL);
-  if(0 != main_ret)
-  {
-      printf("http服务线程退出错误  ret:%d" ,main_ret); 
-      LOG(ERROR)<<"http服务线程退出错误  ret:"<<main_ret; 
-  } 
-
-  //main_ret = stopServer();
-
-  printf("合成服务已退出 ret:%d\n" ,main_ret);
-  LOG(INFO) << "合成服务已退出"<<" "<<"main_ret:"<<main_ret;
-
-  return main_ret;
+    return main_ret;
 }

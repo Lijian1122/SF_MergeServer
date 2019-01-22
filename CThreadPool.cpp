@@ -10,30 +10,31 @@ pthread_cond_t CThreadPool::m_pthreadCond = PTHREAD_COND_INITIALIZER;
 CThreadPool::CThreadPool(int threadNum) 
 {
     m_iThreadNum = threadNum;
-    shutdown = false;
+    shutdown = true;
     Create();
 }
 
 
+//线程执行函数
 void *CThreadPool::MergeFileThread()
 {
     pthread_t tid = pthread_self();
-    while(1)
+    while(shutdown)
     {
         pthread_mutex_lock(&m_pthreadMutex);
-        //如果队列为空，等待新任务进入任务队列
-        while(m_vecTaskList.size() == 0 && !shutdown)
-            pthread_cond_wait(&m_pthreadCond, &m_pthreadMutex);
-        
-        //关闭线程
-        if(shutdown)
-        {
-            pthread_mutex_unlock(&m_pthreadMutex);
-            printf("[tid: %lu]\texit\n", pthread_self());
-            LOG(INFO)<<"线程池 线程 "<<tid<<" 即将退出";
-            pthread_exit(NULL);
-        }
-        
+		
+        //如果队列为空，等待新任务进入任务队列	
+		if(m_vecTaskList.size() == 0)
+		{ 
+			pthread_cond_wait(&m_pthreadCond, &m_pthreadMutex);
+			
+			if(m_vecTaskList.size() == 0)
+			{
+				pthread_mutex_lock(&m_pthreadMutex);
+				continue;		
+			}
+		}
+		      
         printf("[tid: %lu]\trun: ", tid);
         vector<MergeRunable*>::iterator iter = m_vecTaskList.begin();
 
@@ -61,12 +62,16 @@ void *CThreadPool::MergeFileThread()
         {
            delete task;
            task = NULL;
-        } 
-
-        sleep(3);      
+        }     
     } 
+	
+    printf("[tid: %lu]\texit\n", pthread_self());
+    LOG(INFO)<<"线程池 线程 "<<tid<<" 即将退出";
+    pthread_exit(NULL);
+  
     return (void*)0;
 }
+
 //线程回调函数
 void *CThreadPool::ThreadFunc(void* arg) 
 {
@@ -97,7 +102,6 @@ int CThreadPool::Create()
              LOG(ERROR)<<"线程池启动第 "<<m_iThreadNum<<" 个线程失败";
         }
     }
-
     LOG(INFO)<<"线程池已启动 "<<m_iThreadNum<<" 个线程";
         
     return 0;
@@ -107,17 +111,17 @@ int CThreadPool::Create()
 int CThreadPool::StopAll()
 {    
     //避免重复调用
-    if(shutdown)
+    if(!shutdown)
         return -1;
     printf("Now I will end all threads!\n\n");
 
-    LOG(INFO)<<"线程池开始停止所有线程...";
+    LOG(INFO)<<"线程池开始终止所有线程";
     
     //唤醒所有等待进程，线程池也要销毁了
-    shutdown = true;
+    shutdown = false;
     pthread_cond_broadcast(&m_pthreadCond);
     
-    //清楚僵尸
+    //等待线程退出
     for(int i = 0; i < m_iThreadNum; i++)
     {
        if(0 != (pthread_join(pthread_id[i], NULL)))
@@ -134,7 +138,6 @@ int CThreadPool::StopAll()
        pthread_id = NULL;
     }
 
- 
     //销毁互斥量和条件变量
     pthread_mutex_destroy(&m_pthreadMutex);
     pthread_cond_destroy(&m_pthreadCond);

@@ -9,7 +9,7 @@ BINDIR = /lib
 TARGET = $(MONITOR) $(SERVER)
 
 MOBJECTS :=mergeMonitor.o
-OBJECTS :=MergeRunable.o CThreadPool.o mongoose.o webServer.o
+OBJECTS :=MergeRunable.o CThreadPool.o mongoose.o webserver.o
 
 all : $(TARGET)
 
@@ -32,5 +32,5 @@ clean:
 MergeRunable.o: MergeRunable.cpp  MergeRunable.h
 CThreadPool.o: CThreadPool.cpp  CThreadPool.h
 mongoose.o: mongoose.c mongoose.h
-webServer.o: webServer.c
+webserver.o: webserver.c webserver.h
 mergeMonitor.o: mergeMonitor.c

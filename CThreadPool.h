@@ -4,23 +4,31 @@
 #include <vector>
 #include <string>
 #include <pthread.h>
+#include <sys/select.h>
+#include <stdint.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include "MergeRunable.h"
 #include "glog/logging.h"
 
 using namespace std;
 
-
 /*线程池管理类*/
 class CThreadPool 
 {
-
 public:
     CThreadPool(int threadNum);
     ~CThreadPool();
-    int AddTask(MergeRunable *m_task);   //把任务添加到任务队列中
-    int StopAll();  //使线程池中的所有线程退出
-    int getTaskSize();  //获取当前任务队列中的任务数
+	
+	//把任务添加到任务队列中
+    int AddTask(MergeRunable *m_task);
+	
+	//使线程池中的所有线程退出
+    int StopAll();
+	
+	//获取当前任务队列中的任务数
+    int getTaskSize();
 
 private:
 
@@ -38,8 +46,7 @@ protected:
 
     static void *ThreadFunc(void *arg);  //线程回调函数
 
-    void *MergeFileThread();
-    
+    void *MergeFileThread();  
 };
 
 #endif
