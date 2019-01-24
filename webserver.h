@@ -9,45 +9,34 @@ v 0.0.1
 2019.01.22 重构合成服务,Http服务接口处添加队列缓存
 2019.01.22 Http服务返回值用枚举类型代替
 ******************************************************/
-
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
 #include <sys/vfs.h>
 #include <sys/syscall.h>
 #include <dirent.h>
 #include <iostream>
 #include <map>
+#include <queue>
 #include <list>
 #include <pthread.h>
 #include <semaphore.h>
+#include <string>
 
-#define APIStr "/live/merge"
+#include "glog/logging.h"
+#include "mongoose.h"
+#include "json.hpp"
+#include "LibcurClient.h"
+#include "message_queue.h"
+#include "CThreadPool.h"
+#include "common.h"
 
-string  AACSTR = ".aac";
-string  H264STR = ".h264";
-string  JSONSTR = ".json";
-string  MERGESTR = "merge.";
-string  updateOnlineUrl;
-string  RELATIVEPATH= "/home/record_server/recordFile/";
-string  IPPORT= "http://192.168.1.205:8080/live/";
-string  serverName = "合成服务105";
-string  IpPort = "http://";
-string  LOGDIR = "./mergeLog/";
 
-//Http API方法名
-string ServerCreate;
-string ServerDelete;
-string ServerSelect;
-string ServerUpdate;
+extern string IpPort,ServerCreate,ServerDelete,ServerSelect,liveUpdate,liveSelect,liveUpload,
+              merge_serverId,LOGDIR,IpPort,serverName,APIStr,updateOnlineUrl;
+extern const char * s_http_port;
 
-string liveUpdate;
-string liveSelect;
-string liveUpload;
-
-const char *s_http_port = "8081";
-int merge_serverId = 0;  //录制服务ID
 int httpSev_flag = 1;
 int merge_flag = 1;
 
@@ -62,7 +51,8 @@ ostream& operator<<(ostream& out, const PAIR& p)
 enum RESCODE{ 
    NO_ERROR = 0, 
    LIVEID_ERROR,
-   METHOD_ERROR 
+   METHOD_ERROR,
+   MALLOC_ERROR 
 };
 
 //定时器任务类型
@@ -77,3 +67,40 @@ enum PARSE_TYPE{
    REGISTONLINE,
    UPDATA
 };
+
+using json = nlohmann::json;
+using namespace std;
+
+std::queue<char*> mergeParmQueue; //合成参数队列
+
+//Http参数信号量
+sem_t bin_sem;
+sem_t bin_blank;
+
+CThreadPool *threadpool;
+pthread_t httpServer_t, httpTime_t, mergeManage_t;
+LibcurClient *m_httpclient, *s_httpclient;
+
+//Http处理请求
+void ev_handler(struct mg_connection *nc, int ev, void *ev_data);
+
+//处理合成参数 线程
+void *mergeManage_fun(void *data);
+
+//解析Http返回json数据
+int parseResdata(string &resdata,  int ret ,PARSE_TYPE m_Type);
+
+//Http服务监听 线程
+void *httpServer_fun(void *pdata);
+
+//创建日志文件夹
+int CreateLogFileDir(const char *sPathName);
+
+//定时上传状态 线程
+void *httpTime_fun(void *pdata);
+
+//停止服务
+int stopServer();
+
+//启动服务
+int startServer();

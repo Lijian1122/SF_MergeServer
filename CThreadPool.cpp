@@ -1,5 +1,4 @@
 #include "CThreadPool.h"
-#include <cstdio>
 
 
 //静态成员初始化

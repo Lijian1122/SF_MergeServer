@@ -9,10 +9,9 @@ BINDIR = /lib
 TARGET = $(MONITOR) $(SERVER)
 
 MOBJECTS :=mergeMonitor.o
-OBJECTS :=MergeRunable.o CThreadPool.o mongoose.o webserver.o
+OBJECTS :=common.o MergeRunable.o CThreadPool.o mongoose.o webserver.o
 
 all : $(TARGET)
-
 
 # install:	$(TARGET)
 # 	cp $(TARGET) $(BINDIR)
@@ -28,9 +27,9 @@ $(SERVER): $(OBJECTS)
 
 clean:
 	rm -f $(OBJECTS) $(MOBJECTS) $(TARGET)
-
-MergeRunable.o: MergeRunable.cpp  MergeRunable.h
+common.o:common.cpp common.h
+MergeRunable.o: MergeRunable.cpp common.h  MergeRunable.h
 CThreadPool.o: CThreadPool.cpp  CThreadPool.h
 mongoose.o: mongoose.c mongoose.h
-webserver.o: webserver.c webserver.h
+webserver.o: webserver.cpp  common.h  webserver.h
 mergeMonitor.o: mergeMonitor.c

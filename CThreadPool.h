@@ -2,7 +2,6 @@
 #define __THREAD_POOL_H
 
 #include <vector>
-#include <string>
 #include <pthread.h>
 #include <sys/select.h>
 #include <stdint.h>
@@ -13,6 +12,7 @@
 #include "glog/logging.h"
 
 using namespace std;
+
 
 /*线程池管理类*/
 class CThreadPool 
