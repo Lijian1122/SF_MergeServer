@@ -26,14 +26,14 @@ void ev_handler(struct mg_connection *nc, int ev, void *ev_data)
              RESCODE ret = RESCODE::NO_ERROR;
              if(strcmp(url, "/live/merge") == 0)
              {				 
-		int parmlen = (int)hm->query_string.len;
+		        int parmlen = (int)hm->query_string.len;
                 char parmStr[parmlen];
                 sprintf(parmStr, "%.*s",parmlen,hm->query_string.p);		 
-		printf("url参数长度：%d  %s\n",parmlen ,parmStr);
+		        printf("url参数长度：%d  %s\n",parmlen ,parmStr);
               
                 		
-		char *liveId_buf = (char*)malloc(sizeof(char)*parmlen);
-		if(NULL == liveId_buf)
+		        char *liveId_buf = (char*)malloc(sizeof(char)*parmlen);
+		        if(NULL == liveId_buf)
                 {       
                    LOG(ERROR) << "参数liveId malloc失败:"<<liveId_buf;
                    ret = RESCODE::MALLOC_ERROR;
@@ -49,13 +49,10 @@ void ev_handler(struct mg_connection *nc, int ev, void *ev_data)
                    goto end;
                 }
                 		
-	        LOG(INFO)<<"获合成参数 livID:"<<liveId_buf;
-			
-		sem_wait(&bin_blank);  			
-                mergeParmQueue.push(liveId_buf);			
-                sem_post(&bin_sem);     
+	            LOG(INFO)<<"解析参数 livID:"<<liveId_buf;		
+                MergeParmList->pushLockList((void*)liveId_buf);				
            }else
-	   {
+	       {
 			   LOG(ERROR)<<"Methond ERROR";
 			   ret = RESCODE::METHOD_ERROR;
            }
@@ -84,29 +81,26 @@ void ev_handler(struct mg_connection *nc, int ev, void *ev_data)
 //处理合成参数 线程
 void *mergeManage_fun(void *data)
 {
+	void *parmdata = NULL;
     while(merge_flag)
-    {      
-        sem_wait(&bin_sem); 
-		
-	  if(!mergeParmQueue.empty()) //队列非空
-	  {	
-             char *mergeparm = mergeParmQueue.front();
-                
-             LOG(INFO) << "管理线程获取参数 直播ID:"<<mergeparm;
-			 
-	     //新建任务实例，并加入任务队列
-             MergeRunable *taskObj = new MergeRunable(mergeparm);
-             threadpool->AddTask(taskObj);
-             if(NULL != mergeparm)
-             { 
-                 free(mergeparm);
-                 mergeparm= NULL;
-             }      
-
-             mergeParmQueue.pop();     
-             sem_post(&bin_blank); 
-        } 
-   }
+    {             
+	   //录制参数出 参数队列
+       parmdata = MergeParmList->popLockList(); 
+       if(NULL != parmdata)
+       {
+	       char *mergeparm = (char*)parmdata;
+		   
+           LOG(INFO) << "管理线程获取参数 直播ID:"<<mergeparm;
+	       //新建任务实例，并加入任务队列
+           MergeRunable *taskObj = new MergeRunable(mergeparm);
+           threadpool->AddTask(taskObj);
+           if(NULL != mergeparm)
+           { 
+             free(mergeparm);
+             mergeparm= NULL;
+           }       
+      }
+   }  
    return data;
 }
 
@@ -277,6 +271,12 @@ int stopServer()
       printf("http服务线程退出错误  ret:%d" ,main_ret); 
       LOG(ERROR)<<"http服务线程退出错误  ret:"<<main_ret; 
     } 
+	
+	if(NULL != MergeParmList)
+	{
+		delete MergeParmList;
+		MergeParmList = NULL;
+	}
     return main_ret;
 }
 
@@ -347,20 +347,13 @@ int startServer()
        //return main_ret;
     }
   
-    //Http参数信号量初始化
-    main_ret = sem_init(&bin_sem, 0, 0);
-    if(0 != main_ret)
-    {  
-      LOG(ERROR) << "bin_sem创建失败"<<" "<<"main_ret:"<<main_ret;
-      return main_ret ;
-    }
- 
-    main_ret = sem_init(&bin_blank, 0, 1000);
-    if(0 != main_ret)
-    {  
-      LOG(ERROR) << "bin_blank创建失败"<<" "<<"main_ret:"<<main_ret;
-      return main_ret ;
-    }
+    //参数队列初始化
+    MergeParmList = new CommonList(true);
+    if(0 != MergeParmList->getRescode())
+    {
+       LOG(ERROR) << "初始化参数队列失败  main_ret:"<<MergeParmList->getRescode();
+       return main_ret;
+    } 
   
     //往消息队列里面写数据
     //int msqid = getMsgQueue();

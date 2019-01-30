@@ -1,0 +1,33 @@
+VERSION=v1.0
+LIBDIR=/lib
+CC = g++
+
+CPPFLAGS := -g -Wall -fPIC -Wno-error=overflow -std=c++11
+CFLAGS  := -Wall -std=c++11 -g
+
+SHARE := -shared
+
+OPEN_LIB = -lpthread  -lcurl
+
+OBJS =common.o  LibcurClient.o CommonList.o MessageQueue.o 
+LIB = libmbase.so 
+
+all : $(LIB)
+
+install: $(LIB)
+	cp $(LIB) $(LIBDIR)
+
+FORCE:
+$(LIB) : $(OBJS)
+
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(SHARE) -o $@ $(OBJS) $(OPEN_LIB)
+
+clean:
+	rm -f $(OBJS) $(LIB)
+
+common.o:common.cpp common.h
+LibcurClient.o: LibcurClient.cpp LibcurClient.h
+CommonList.o: CommonList.cpp  CommonList.h
+MessageQueue.o: MessageQueue.c MessageQueue.h
+
+

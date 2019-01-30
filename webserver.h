@@ -26,11 +26,9 @@ v 0.0.1
 
 #include "glog/logging.h"
 #include "mongoose.h"
-#include "json.hpp"
-#include "LibcurClient.h"
-#include "message_queue.h"
+#include "Base/base.h"
 #include "CThreadPool.h"
-#include "common.h"
+#include "Base/common.h"
 
 
 extern string IpPort,ServerCreate,ServerDelete,ServerSelect,liveUpdate,liveSelect,liveUpload,
@@ -71,11 +69,7 @@ enum PARSE_TYPE{
 using json = nlohmann::json;
 using namespace std;
 
-std::queue<char*> mergeParmQueue; //合成参数队列
-
-//Http参数信号量
-sem_t bin_sem;
-sem_t bin_blank;
+CommonList *MergeParmList;
 
 CThreadPool *threadpool;
 pthread_t httpServer_t, httpTime_t, mergeManage_t;

@@ -4,9 +4,8 @@
 #include <dirent.h>
 #include <unistd.h>
 #include "glog/logging.h"
-#include "json.hpp"
-#include "LibcurClient.h"
-#include "common.h"
+#include "Base/base.h"
+
 
 using json = nlohmann::json;
 
