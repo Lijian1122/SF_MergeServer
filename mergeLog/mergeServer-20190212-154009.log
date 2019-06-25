@@ -1,0 +1,7 @@
+Log file created at: 2019/02/12 15:40:09
+Running on machine: live2.sanhai
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E0212 15:40:09.675897  7360 webserver.cpp:346] 调用注册录制服务 失败  main_ret:6
+I0212 15:40:09.676606  7360 CThreadPool.cpp:104] 线程池已启动 10 个线程
+I0212 15:40:09.676677  7360 webserver.cpp:407] server start: main_ret:0
+I0212 15:40:09.677023  7364 webserver.cpp:189] 合成服务已启动 on port:8082

@@ -7,17 +7,17 @@ CommonList::CommonList(bool lockFlag)
 	if(m_lockFlag)
 	{
 	   m_ret = sem_init(&bin_sem, 0, 0);
+           if(0 != m_ret)
+           {  
+             LOG(ERROR) << "bin_sem创建失败"<<" "<<"main_ret:"<<m_ret;
+           }
+           m_ret = sem_init(&bin_blank, 0, 1000);
           if(0 != m_ret)
           {  
-             LOG(ERROR) << "bin_sem创建失败"<<" "<<"main_ret:"<<m_ret;
-          }
-          m_ret = sem_init(&bin_blank, 0, 1000);
-         if(0 != m_ret)
-         {  
             LOG(ERROR) << "bin_blank创建失败"<<" "<<"main_ret:"<<m_ret;
           }	
         }	
-       m_list.clear();
+        m_list.clear();
 }
 
 void CommonList::pushLockList(void *data)

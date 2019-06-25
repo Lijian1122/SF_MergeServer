@@ -3,15 +3,14 @@
 
 using namespace std;
 
-const char *s_http_port = "8082";
-
-string  APIStr="/live/merge";
+string  ServerPort;
+string  APIStr;
 string  updateOnlineUrl;
-string  RELATIVEPATH= "/recordServer/SF_MergeServer/";
-string  IPPORT= "http://192.168.1.205:8080/live/";
-string  serverName = "合成服务105";
-string  IpPort = "http://";
-string  LOGDIR = "./mergeLog/";
+string  RELATIVEPATH;
+string  IPPORT;
+string  serverName;
+string  IpPort;
+string  LOGDIR;
 
 //Http API方法名
 string ServerCreate;

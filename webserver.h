@@ -8,6 +8,10 @@
 v 0.0.1
 2019.01.22 重构合成服务,Http服务接口处添加队列缓存
 2019.01.22 Http服务返回值用枚举类型代替
+
+v 0.0.2
+2019.06.25 合成服务增加配置文件
+2019.06.25 调试注册服务接口
 ******************************************************/
 #include <stdio.h>
 #include <string.h>
@@ -29,14 +33,16 @@ v 0.0.1
 #include "Base/base.h"
 #include "CThreadPool.h"
 #include "Base/common.h"
+//#include "Base/CommonList.h"
 
-
-extern string IpPort,ServerCreate,ServerDelete,ServerSelect,liveUpdate,liveSelect,liveUpload,
+extern string ServerPort, IpPort,ServerCreate,ServerDelete,ServerSelect,ServerUpdate,liveUpdate,liveSelect,liveUpload,
               merge_serverId,LOGDIR,IpPort,serverName,APIStr,updateOnlineUrl;
-extern const char * s_http_port;
+
+string HttpAPIStr,ServerName,ServerNameAPIStr, ServerCreateStr;
 
 int httpSev_flag = 1;
 int merge_flag = 1;
+int threadCount = 0;
 
 typedef pair<int , string> PAIR;
 
@@ -74,6 +80,9 @@ CommonList *MergeParmList;
 CThreadPool *threadpool;
 pthread_t httpServer_t, httpTime_t, mergeManage_t;
 LibcurClient *m_httpclient, *s_httpclient;
+
+//读取配置文件对象
+CConfigFileReader config_file("server.conf");
 
 //Http处理请求
 void ev_handler(struct mg_connection *nc, int ev, void *ev_data);

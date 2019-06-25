@@ -1,13 +1,15 @@
 CC:= g++
 LIBS:= -lpthread -lglog -lmbase
-CPPFLAGS:= -std=c++11 -g -Wall -D_REENTRANT
-
-BASE=Base/libmbase.so
+CPPFLAGS:= -std=c++11 -g -Wno-deprecated -Wall -D_REENTRANT -Wcpp
 
 SERVER = mergeServer
 MONITOR = mergeMonitor
 
-BINDIR = /lib
+BASE_ROOT = ./libs
+BATHPATH = -L $(BASE_ROOT)
+LIBVAR = -lbase
+
+OPEN_LIB =  -lcurl -lglog -lpthread
 
 TARGET = $(MONITOR) $(SERVER)
 
@@ -26,10 +28,10 @@ $(BASE): FORCE
 	@cd Base; $(MAKE) all
 
 $(SERVER): $(OBJECTS)
-	$(CC) -o $(SERVER) $(OBJECTS) $(LIBS)
+	$(CC) -o $(SERVER) $(OBJECTS) $(BATHPATH) $(LIBVAR) $(OPEN_LIB)
 	
 $(MONITOR): $(MOBJECTS)
-	$(CC) -o $(MONITOR) $(MOBJECTS) $(LIBS)
+	$(CC) -o $(MONITOR) $(MOBJECTS) $(BATHPATH) $(LIBVAR) $(OPEN_LIB)
 
 %.o:%.cpp   
 	$(CC) -g3 -c $(CPPFLAGS) $< -o $@

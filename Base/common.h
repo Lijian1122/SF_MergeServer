@@ -8,8 +8,7 @@
 #include <unistd.h>
 #include <iostream>
 
-extern const char *s_http_port;
-
+extern  string  ServerPort;
 extern  string  APIStr;
 extern  string  updateOnlineUrl;
 extern  string  RELATIVEPATH;

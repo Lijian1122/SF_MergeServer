@@ -1,0 +1,6 @@
+Log file created at: 2019/06/25 16:31:25
+Running on machine: live2.sanhai
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E0625 16:31:25.834717 21525 webserver.cpp:346] 调用注册录制服务 失败  main_ret:3
+E0625 16:31:25.835213 21525 webserver.cpp:354] 初始化参数队列失败  main_ret:10296272
+I0625 16:31:25.835253 21525 webserver.cpp:402] server start error:  main_ret:3
