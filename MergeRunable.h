@@ -5,14 +5,14 @@
 #include <unistd.h>
 #include "glog/logging.h"
 #include "Base/base.h"
-
+#include "Mutexmp4/MP4Encoder.h"
 
 using json = nlohmann::json;
 
 using namespace std;
 
-extern string AACSTR ,H264STR ,JSONSTR ,MERGESTR ,RELATIVEPATH ,IPPORT;
-
+extern string AACSTR ,H264STR ,JSONSTR ,MERGESTR ,RELATIVEPATH ,IPPORT, MergeFilePath, MP4STR;
+extern string IpPort,liveUpdate,liveSelect,liveUpload;
 class MergeRunable
 {
 public:
@@ -49,7 +49,9 @@ private:
 	
    std::string m_liveId;
    int m_liveIdSize;
-
+   
+   /*MP4合成对象*/
+   MP4Encoder *m_mp4encoder;
 };
 
 #endif // MERGERUNABLE_H

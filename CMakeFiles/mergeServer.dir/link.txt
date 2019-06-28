@@ -1,0 +1,1 @@
+/usr/bin/c++   -O0 -Wall -std=c++11  -fPIC -Wno-deprecated  -Wno-write-strings -g -ggdb  -rdynamic CMakeFiles/mergeServer.dir/CThreadPool.cpp.o CMakeFiles/mergeServer.dir/MergeRunable.cpp.o CMakeFiles/mergeServer.dir/mongoose.c.o CMakeFiles/mergeServer.dir/webserver.cpp.o  -o mergeServer libs/libmuxermp4.a libs/libbase.a Mutexmp4/lib/libmp4v2.a -lg7112aac -lcurl -lglog -lpthread 

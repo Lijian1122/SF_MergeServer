@@ -309,6 +309,8 @@ int startServer()
     string threadCountStr = config_file.GetConfigName("ThreadCount");
     threadCount = std::stoi(threadCountStr);
 
+    MergeFilePath= config_file.GetConfigName("MergeFilePath");
+
     main_ret = CreateLogFileDir(LOGDIR.c_str());
     if(0 != main_ret)
     {

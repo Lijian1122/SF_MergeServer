@@ -34,6 +34,15 @@ extern string  AACSTR;
 extern string  H264STR;
 extern string  JSONSTR;
 extern string  MERGESTR;
+extern string  MP4STR;
+extern string  CFGSTR;
 
+//裸码流文件路径
+extern string  MergeFilePath;
 
+//配置文件时间戳key字段
+extern string aacTimestamp;
+extern string h264Timestamp;
+extern string whiteTimestamp;
+extern string recordTimestr;
 #endif

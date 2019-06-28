@@ -2,12 +2,16 @@
 
 MergeRunable::MergeRunable(std::string liveID)
 {
-	 m_liveId = liveID;
-         m_liveIdSize = 0;
+     m_liveId = liveID;
+     m_liveIdSize = 0;
+	 
+     m_mp4encoder = new MP4Encoder(MergeFilePath,m_liveId);
+	 
 }
 int MergeRunable::run()
 {
-    int rescode = searchFile();
+	//int rescode =  searchFile();
+    int rescode = m_mp4encoder->MergeFilesToMp4();
     if(0 != rescode)
     {
        LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<" 失败"<< "  rescode:"<<rescode;
@@ -16,7 +20,10 @@ int MergeRunable::run()
     }
     LOG(INFO)<<"执行任务 liveID:"<<m_liveId<<"  合成成功"<< "  rescode:"<<rescode;
 
-    rescode = UpdataMergeflag(rescode);
+    if(rescode == 0)
+    {
+          rescode = UpdataMergeflag(1);
+    }
     return rescode;
 }
 
@@ -24,7 +31,9 @@ int MergeRunable::UpdataMergeflag(int flag)
 {
     LibcurClient  m_httpclient;
     std::string resCodeInfo;
-    std::string urlparm = "live_update?liveId=";
+
+   
+    std::string urlparm = IpPort + liveUpdate + "?liveId=";
    
     urlparm.append( m_liveId);
     urlparm.append("&mixFlag=");
@@ -32,9 +41,9 @@ int MergeRunable::UpdataMergeflag(int flag)
     char flagStr[10] ={};
     snprintf(flagStr, sizeof(flagStr), "%d",flag);
     urlparm.append(flagStr);
-    urlparm.append("&operateId=8888");
+    urlparm.append("&operateId=test");
   
-    std::string updataUrl = IPPORT + urlparm;
+    std::string updataUrl = urlparm;
     LOG(INFO)<<"UpdataMergeUrl:"<<updataUrl;
 
     int m_ret = m_httpclient.HttpGetData(updataUrl.c_str());
@@ -49,26 +58,33 @@ int MergeRunable::ParseJsonInfo(std::string &jsonStr ,std::string &resCodeInfo)
 {
     int main_ret = 0;
     std::cout<<"parse json:"<<jsonStr<<endl;
-    json m_object = json::parse(jsonStr);
-    if(m_object.is_object())
+    if(!jsonStr.empty())
     {
-         string resCode = m_object.value("code", "oops");
-         main_ret = atoi(resCode.c_str() );
+        json m_object = json::parse(jsonStr);
+        if(m_object.is_object())
+        {
+            string resCode = m_object.value("code", "oops");
+            main_ret = atoi(resCode.c_str() );
 
-         if(0 == main_ret)
-         {
-            LOG(INFO)<<"执行任务 liveID:"<<m_liveId <<"  上传合成状态成功";          
-         }else
-         {      
-            resCodeInfo = m_object.value("msg", "oops");          
-            LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<"  上传合成状态失败  msg:"<<resCodeInfo;
-         }
-    }else
-    {
-        LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<" 返回http 接口数据不全!";
-        main_ret = 1;   
-    }
-	return main_ret;
+            if(0 == main_ret)
+            {
+                LOG(INFO)<<"执行任务 liveID:"<<m_liveId <<"  上传合成状态成功";          
+            }else
+            {      
+                resCodeInfo = m_object.value("msg", "oops");          
+                LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<"  上传合成状态失败  msg:"<<resCodeInfo;
+            }
+       }else
+       {
+          LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<" 返回http 接口数据不全!";
+          main_ret = 1;   
+        }
+     }else
+     {
+         LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<" 返回http 接口数据为空!";
+         main_ret = 2;
+     }
+     return main_ret;
 }
 
 int MergeRunable::searchFile()

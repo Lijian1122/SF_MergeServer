@@ -1,0 +1,3 @@
+/home/SF_MergeServer/Base/CMakeFiles/rebuild_cache.dir
+/home/SF_MergeServer/Base/CMakeFiles/edit_cache.dir
+/home/SF_MergeServer/Base/CMakeFiles/base.dir

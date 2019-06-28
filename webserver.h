@@ -36,7 +36,7 @@ v 0.0.2
 //#include "Base/CommonList.h"
 
 extern string ServerPort, IpPort,ServerCreate,ServerDelete,ServerSelect,ServerUpdate,liveUpdate,liveSelect,liveUpload,
-              merge_serverId,LOGDIR,IpPort,serverName,APIStr,updateOnlineUrl;
+              merge_serverId,LOGDIR,IpPort,serverName,APIStr,updateOnlineUrl,MergeFilePath;
 
 string HttpAPIStr,ServerName,ServerNameAPIStr, ServerCreateStr;
 

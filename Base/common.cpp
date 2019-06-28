@@ -29,3 +29,15 @@ string  AACSTR = ".aac";
 string  H264STR = ".h264";
 string  JSONSTR = ".json";
 string  MERGESTR = "merge.";
+string  MP4STR = ".mp4";
+string  CFGSTR = ".cfg";
+
+//裸码流文件路径
+string  MergeFilePath;
+
+//合成配置文件字段
+string aacTimestamp =  "AACTimestamp";
+string h264Timestamp =  "H264Timestamp";
+string whiteTimestamp =  "WhiteTimestamp";
+string recordTimestr = "RecordTimes";
+

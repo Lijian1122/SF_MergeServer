@@ -1,0 +1,48 @@
+CC:= g++
+LIBS:= -lpthread -lglog -lmbase
+CPPFLAGS:= -std=c++11 -g -Wno-deprecated -Wall -D_REENTRANT -Wcpp
+
+SERVER = mergeServer
+MONITOR = mergeMonitor
+
+BASE_ROOT = ./libs
+BATHPATH = -L $(BASE_ROOT)
+LIBVAR = -lbase
+LIBMP4 = -lmuxermp4
+
+INCLUDE_ROOT = ./Mutexmp4/include
+EXT_INC = -I $(INCLUDE_ROOT)
+
+OPEN_LIB =  -lcurl -lglog -lpthread
+
+TARGET = $(MONITOR) $(SERVER)
+
+MOBJECTS :=mergeMonitor.o
+OBJECTS :=MergeRunable.o CThreadPool.o mongoose.o webserver.o
+
+all : $(BASE) $(TARGET)
+
+install:	$(TARGET)
+	cp $(TARGET) $(BINDIR)
+	@cd Base; $(MAKE) install
+	
+FORCE:
+
+$(BASE): FORCE
+	@cd Base; $(MAKE) all
+
+$(SERVER): $(OBJECTS)
+	$(CC) $(INCLUDE_ROOT) -o $(SERVER) $(OBJECTS) $(BATHPATH) $(LIBVAR) $(LIBMP4) $(OPEN_LIB)
+	
+$(MONITOR): $(MOBJECTS)
+	$(CC) $(INCLUDE_ROOT) -o $(MONITOR) $(MOBJECTS) $(BATHPATH) $(LIBVAR) $(OPEN_LIB)
+
+%.o:%.cpp   
+	$(CC) $(INCLUDE_ROOT) -g3 -c $(CPPFLAGS) $< -o $@
+	
+%.o:%.c   
+	$(CC)  $(INCLUDE_ROOT) -g3 -c $(CPPFLAGS) $< -o $@
+
+clean:
+	rm -f $(OBJECTS) $(MOBJECTS) $(TARGET)
+	@cd Base; $(MAKE) clean

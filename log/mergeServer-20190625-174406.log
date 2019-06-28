@@ -1,7 +1,0 @@
-Log file created at: 2019/06/25 17:44:06
-Running on machine: live2.sanhai
-Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
-I0625 17:44:06.847605 25705 webserver.cpp:144] 录制服务 merge_serverId:578
-I0625 17:44:06.849586 25705 CThreadPool.cpp:104] 线程池已启动 10 个线程
-I0625 17:44:06.849721 25705 webserver.cpp:425] server start: main_ret:0
-I0625 17:44:06.850288 25706 webserver.cpp:189] 合成服务已启动 on port:8082
