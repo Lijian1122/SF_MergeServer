@@ -46,6 +46,10 @@ public:
 
     //合成裸码流到MP4
     int MergeFilesToMp4();
+
+    int MergeFilesToMp4(string fileName);
+
+    int MergeFilesToMp4(int recordtimes);
     
     //靠靠靠縨p4靠
     MP4FileHandle CreateMP4File(const char* fileName,int width,int height,int timeScale=90000,int frameRate=25);

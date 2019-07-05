@@ -6,25 +6,76 @@ MergeRunable::MergeRunable(std::string liveID)
      m_liveIdSize = 0;
 	 
      m_mp4encoder = new MP4Encoder(MergeFilePath,m_liveId);
+
+     recordTimes = 0;
 	 
 }
-int MergeRunable::run()
+/*int MergeRunable::run()
 {
-	//int rescode =  searchFile();
-    int rescode = m_mp4encoder->MergeFilesToMp4();
-    if(0 != rescode)
-    {
-       LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<" 失败"<< "  rescode:"<<rescode;
+    int rescode =  searchFile();
 
-       return rescode;
+    recordTimes = m_H264Map.size();
+
+    if(recordTimes > 0)
+    {
+       int rescode = m_mp4encoder->MergeFilesToMp4(recordTimes);
+       if(0 != rescode)
+       {
+          LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<" 失败"<< "  rescode:"<<rescode;
+          return rescode;
+       }
+       LOG(INFO)<<"执行任务 liveID:"<<m_liveId<<"  合成成功"<< "  rescode:"<<rescode;
     }
-    LOG(INFO)<<"执行任务 liveID:"<<m_liveId<<"  合成成功"<< "  rescode:"<<rescode;
 
     if(rescode == 0)
     {
           rescode = UpdataMergeflag(1);
     }
     return rescode;
+}*/
+
+int MergeRunable::run()
+{
+    
+    int rescode =  searchFile();
+   
+    string fileName;
+    
+    recordTimes = m_H264Map.size();
+
+    if(recordTimes > 0)
+    { 
+        for(int i =0 ; i< recordTimes; i++)
+        {
+	    if(i != 0)
+	    {
+	       string numberStr = "(";
+	       numberStr.append("+").append(std::to_string(i)).append(")");
+	       fileName = MergeFilePath + m_liveId + "/"  + m_liveId + numberStr;
+	    }else
+            {
+		fileName = MergeFilePath + m_liveId + "/"  + m_liveId;	
+	    }		
+	    int rescode = m_mp4encoder->MergeFilesToMp4(fileName);
+			
+	    if(0 != rescode)
+            {
+                  LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<" 失败"<< "  rescode:"<<rescode<<"   fileName:"<<fileName;
+                  return rescode;
+             }else
+	     {
+                  LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<"  合成成功"<< "  rescode:"<<rescode<<"   fileName:"<<fileName;
+	     }
+        }
+
+        rescode = UpdataMergeflag(rescode);
+        return rescode;
+   }else
+   {
+       rescode = 1;
+       LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<"  文件为空!!!";
+       return rescode ;
+   }
 }
 
 int MergeRunable::UpdataMergeflag(int flag)
@@ -89,14 +140,14 @@ int MergeRunable::ParseJsonInfo(std::string &jsonStr ,std::string &resCodeInfo)
 
 int MergeRunable::searchFile()
 {
-	DIR *dir;
+    DIR *dir;
     struct dirent *ptr;
     int rescode = 0;
 
     //获取文件路径
-     m_liveIdSize = m_liveId.size();
-    std::string m_path = RELATIVEPATH;
-    m_path.append(m_liveId);
+    m_liveIdSize = m_liveId.size();
+    std::string m_path =  MergeFilePath + m_liveId;
+    
     if((dir=opendir(m_path.c_str())) == NULL)
     {
         LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<"  打开文件路径失败";
@@ -109,24 +160,21 @@ int MergeRunable::searchFile()
         {
            string fileName = ptr->d_name;
 		   
-           if(string::npos == fileName.find(MERGESTR))
-		   {
-			    if(string::npos != fileName.find(AACSTR))
-                {
+	   if(string::npos != fileName.find(AACSTR))
+           {
                   setFileNameToMap(m_AacMap,fileName,AACSTR);
-                }else if(string::npos != fileName.find(H264STR))
-                {
+           }else if(string::npos != fileName.find(H264STR))
+           {
                   setFileNameToMap(m_H264Map , fileName,H264STR);
-                }else if(string::npos != fileName.find(JSONSTR))
-                {
+           }else if(string::npos != fileName.find(JSONSTR))
+           {
                   setFileNameToMap(m_JsonMap,fileName,JSONSTR);
-                }
-		  }     
+           }     
        } 
     } 
 
     closedir(dir);
-    if(0 != m_AacMap.size())
+    /*if(0 != m_AacMap.size())
     {
        rescode = mergeFile(m_AacMap,AACSTR);
     }
@@ -137,7 +185,7 @@ int MergeRunable::searchFile()
     if(0!= m_JsonMap.size())
     {
        rescode = mergeFile(m_JsonMap,JSONSTR);
-    }
+    }*/
   
     return rescode;
 }

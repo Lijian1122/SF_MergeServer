@@ -1,0 +1,34 @@
+Log file created at: 2019/07/01 11:30:47
+Running on machine: live2.sanhai
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E0701 11:30:47.167207 28382 webserver.cpp:155] 接口返回数据异常 ret:-1  错误信息:
+### Error updating database.  Cause: java.sql.SQLIntegrityConstraintViolationException: Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'
+### The error may involve com.dbr.eduLive.Dao.ServiceDao.serverInsert-Inline
+### The error occurred while setting parameters
+### SQL: insert into server_info    (      netFlag    ,     serverType    ,     serverName    ,     serverApi    )    values    (      ?    ,     ?    ,     ?    ,     ?    )
+### Cause: java.sql.SQLIntegrityConstraintViolationException: Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'
+; SQL []; Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'; nested exception is java.sql.SQLIntegrityConstraintViolationException: Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'
+E0701 11:30:47.167965 28382 webserver.cpp:376] 解析注册录制 数据失败 main_ret:-1
+I0701 11:30:47.172308 28387 webserver.cpp:189] 合成服务已启动 on port:8082
+I0701 11:30:47.180735 28382 CThreadPool.cpp:104] 线程池已启动 10 个线程
+I0701 11:30:47.182176 28382 webserver.cpp:437] server start: main_ret:0
+I0701 11:30:51.422425 28387 webserver.cpp:24] Get Url:/muxer/mergefile
+I0701 11:30:51.422585 28387 webserver.cpp:52] 解析参数 livID:100120190330gEdVJz8U
+I0701 11:30:51.422863 28388 webserver.cpp:93] 管理线程获取参数 直播ID:100120190330gEdVJz8U
+I0701 11:30:51.423046 28398 CThreadPool.cpp:50]  开始执行任务 liveID:100120190330gEdVJz8U
+I0701 11:30:51.518427 28387 webserver.cpp:24] Get Url:/favicon.ico
+E0701 11:30:51.518469 28387 webserver.cpp:56] Methond ERROR
+I0701 11:30:52.056742 28398 MergeRunable.cpp:21] 执行任务 liveID:100120190330gEdVJz8U  合成成功  rescode:0
+I0701 11:30:52.056769 28398 MergeRunable.cpp:47] UpdataMergeUrl:http://192.168.1.205:8080/live/live_update?liveId=100120190330gEdVJz8U&mixFlag=1&operateId=test
+I0701 11:30:53.127959 28398 MergeRunable.cpp:71] 执行任务 liveID:100120190330gEdVJz8U  上传合成状态成功
+I0701 11:30:53.128237 28398 CThreadPool.cpp:58]  执行任务 liveID:100120190330gEdVJz8U  完成
+I0701 13:43:51.053835 28387 webserver.cpp:24] Get Url:/muxer/mergefile
+I0701 13:43:51.053954 28387 webserver.cpp:52] 解析参数 livID:100120190330gEdVJz8U
+I0701 13:43:51.054064 28388 webserver.cpp:93] 管理线程获取参数 直播ID:100120190330gEdVJz8U
+I0701 13:43:51.054277 28396 CThreadPool.cpp:50]  开始执行任务 liveID:100120190330gEdVJz8U
+I0701 13:43:51.210363 28387 webserver.cpp:24] Get Url:/favicon.ico
+E0701 13:43:51.210441 28387 webserver.cpp:56] Methond ERROR
+I0701 13:43:51.390024 28396 MergeRunable.cpp:21] 执行任务 liveID:100120190330gEdVJz8U  合成成功  rescode:0
+I0701 13:43:51.390050 28396 MergeRunable.cpp:47] UpdataMergeUrl:http://192.168.1.205:8080/live/live_update?liveId=100120190330gEdVJz8U&mixFlag=1&operateId=test
+I0701 13:43:52.494812 28396 MergeRunable.cpp:71] 执行任务 liveID:100120190330gEdVJz8U  上传合成状态成功
+I0701 13:43:52.495020 28396 CThreadPool.cpp:58]  执行任务 liveID:100120190330gEdVJz8U  完成

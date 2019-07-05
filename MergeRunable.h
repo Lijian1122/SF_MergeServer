@@ -52,6 +52,11 @@ private:
    
    /*MP4合成对象*/
    MP4Encoder *m_mp4encoder;
+
+   /*配置文件*/
+   CConfigFileReader *config_file;
+   int recordTimes;
+
 };
 
 #endif // MERGERUNABLE_H
