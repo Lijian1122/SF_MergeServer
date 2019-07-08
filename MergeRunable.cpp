@@ -4,80 +4,93 @@ MergeRunable::MergeRunable(std::string liveID)
 {
      m_liveId = liveID;
      m_liveIdSize = 0;
-	 
-     m_mp4encoder = new MP4Encoder(MergeFilePath,m_liveId);
 
+     config_file = NULL;
      recordTimes = 0;
-	 
+
+     m_AacMap.clear();
+     m_H264Map.clear();
+     m_JsonMap.clear();
 }
+
 /*int MergeRunable::run()
 {
-    int rescode =  searchFile();
+    int rescode = 0;
+    m_mp4encoder = new MP4Encoder(MergeFilePath,m_liveId);
+    if(m_mp4encoder) {
+        int rescode = searchFile();
+        recordTimes = m_H264Map.size();
 
-    recordTimes = m_H264Map.size();
-
-    if(recordTimes > 0)
+        if (recordTimes > 0) {
+            rescode = m_mp4encoder->MergeFilesToMp4(recordTimes);
+            if (0 != rescode) {
+                LOG(ERROR) << "执行任务 liveID:" << m_liveId << " 失败" << "  rescode:" << rescode;
+            } else {
+                LOG(INFO) << "执行任务 liveID:" << m_liveId << "  合成成功" << "  rescode:" << rescode;
+                printf("执行任务 liveID:%s  合成成功 rescode:%d", m_liveId.c_str(), rescode);
+            }
+        } else {
+             rescode = 1;  //无文件 设置状态为 1
+             LOG(ERROR) << "执行任务 liveID:" << m_liveId << "  录制文件为空!!!";
+        }
+        //更新合成状态
+        rescode = UpdataMergeflag(rescode);
+    }else
     {
-       int rescode = m_mp4encoder->MergeFilesToMp4(recordTimes);
-       if(0 != rescode)
-       {
-          LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<" 失败"<< "  rescode:"<<rescode;
-          return rescode;
-       }
-       LOG(INFO)<<"执行任务 liveID:"<<m_liveId<<"  合成成功"<< "  rescode:"<<rescode;
-    }
-
-    if(rescode == 0)
-    {
-          rescode = UpdataMergeflag(1);
+        rescode = -1;
+        LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<" 失败"<< "  rescode:"<<rescode<<"实例化合成对象失败！";
     }
     return rescode;
 }*/
 
 int MergeRunable::run()
 {
-    
-    int rescode =  searchFile();
-   
-    string fileName;
-    
-    recordTimes = m_H264Map.size();
+    int rescode = 0;
+    m_mp4encoder = new MP4Encoder(MergeFilePath,m_liveId);
+    if(m_mp4encoder)
+    {
+          int rescode =  searchFile();
+          string fileName;
+          recordTimes = m_H264Map.size();
 
-    if(recordTimes > 0)
-    { 
-        for(int i =0 ; i< recordTimes; i++)
-        {
-	    if(i != 0)
-	    {
-	       string numberStr = "(";
-	       numberStr.append("+").append(std::to_string(i)).append(")");
-	       fileName = MergeFilePath + m_liveId + "/"  + m_liveId + numberStr;
-	    }else
-            {
-		fileName = MergeFilePath + m_liveId + "/"  + m_liveId;	
-	    }		
-	    int rescode = m_mp4encoder->MergeFilesToMp4(fileName);
-			
-	    if(0 != rescode)
-            {
-                  LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<" 失败"<< "  rescode:"<<rescode<<"   fileName:"<<fileName;
-                  return rescode;
-             }else
-	     {
-                  LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<"  合成成功"<< "  rescode:"<<rescode<<"   fileName:"<<fileName;
-	     }
-        }
+          if(recordTimes > 0)
+          {
+              for (int i = 0; i < recordTimes; i++) {
+                  if (i != 0) {
+                      string numberStr = "(";
+                      numberStr.append("+").append(std::to_string(i)).append(")");
+                      fileName = MergeFilePath + m_liveId + "/" + m_liveId + numberStr;
+                  } else {
+                      fileName = MergeFilePath + m_liveId + "/" + m_liveId;
+                  }
+                  rescode = m_mp4encoder->MergeFilesToMp4(fileName);
 
-        rescode = UpdataMergeflag(rescode);
-        return rescode;
-   }else
-   {
-       rescode = 1;
-       LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<"  文件为空!!!";
-       return rescode ;
-   }
+                  if (0 != rescode) {
+                      LOG(ERROR) << "执行任务 liveID:" << m_liveId << " 失败" << "  rescode:" << rescode << "   fileName:"
+                                 << fileName;
+                  } else {
+                      LOG(INFO) << "执行任务 liveID:" << m_liveId << "  合成成功" << "  rescode:" << rescode << "   fileName:"
+                                 << fileName;
+                      printf("执行任务 liveID:%s  合成成功  rescode:%d  fileName:%s", m_liveId.c_str(), rescode, fileName.c_str());
+                  }
+              }
+          } else {
+                rescode = 1;  //无文件设置状态为 1
+                LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<"  录制文件为空!!!";
+         }
+
+         //更新合成状态 ，0为正常合成状态 ，非 0为异常
+         rescode = UpdataMergeflag(rescode);
+    }else
+    {
+         rescode = -1;
+         LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<" 失败"<< "  rescode:"<<rescode<<"实例化合成对象失败！";
+    }
+
+    return rescode;
 }
 
+//更新合成状态
 int MergeRunable::UpdataMergeflag(int flag)
 {
     LibcurClient  m_httpclient;
@@ -160,7 +173,7 @@ int MergeRunable::searchFile()
         {
            string fileName = ptr->d_name;
 		   
-	   if(string::npos != fileName.find(AACSTR))
+	       if(string::npos != fileName.find(AACSTR))
            {
                   setFileNameToMap(m_AacMap,fileName,AACSTR);
            }else if(string::npos != fileName.find(H264STR))
@@ -294,5 +307,18 @@ int MergeRunable::mergeFile(std::map<int, string> &Map, std::string filetype)
 }
 MergeRunable::~MergeRunable()
 {
-	
+    if(m_mp4encoder)
+    {
+        delete  m_mp4encoder;
+        m_mp4encoder = NULL;
+    }
+    if(config_file)
+    {
+        delete config_file;
+        config_file = NULL;
+    }
+
+    m_AacMap.clear();
+    m_H264Map.clear();
+    m_JsonMap.clear();
 }

@@ -12,7 +12,12 @@ v 0.0.1
 v 0.0.2
 2019.06.25 合成服务增加配置文件
 2019.06.25 调试注册服务接口
+
+v 0.0.3
+2019.07.05 增加修改合成参数结构体
 ******************************************************/
+#ifndef WEBSERVER_H
+#define WEBSERVER_H
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -65,12 +70,19 @@ enum TIMER_TYPE{
    CHEDISK
 };
 
-//Http接口返回值类型
+//Http接口返回数据类型
 enum PARSE_TYPE{ 
    GETAPI = 0,
    REGISTONLINE,
    UPDATA
 };
+
+//合成参数结构
+typedef struct MergeParmStruct
+{
+    string liveID;
+    int cdmType = 0;
+}MergeParmStruct;
 
 using json = nlohmann::json;
 using namespace std;
@@ -107,3 +119,5 @@ int stopServer();
 
 //启动服务
 int startServer();
+
+#endif

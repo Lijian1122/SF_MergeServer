@@ -12,6 +12,7 @@ purpose:¿mp4v2¿¿¿¿¿¿¿¿AAC¿h264¿¿mp4¿¿¿¿
 #include <sys/types.h>
 #include <string>
 #include <string.h>
+#include "glog/logging.h"
 #include "base.h"
 
 #define HTON16(x)  ((x>>8&0xff)|(x<<8&0xff00))
@@ -27,7 +28,6 @@ typedef struct _MP4ENC_NaluUnit
    unsigned char*data;
 }MP4ENC_NaluUnit;
 
-//¿¿¿¿¿¿¿¿?
 typedef struct _RTMPFrame {
 	bool m_bKeyFrame;
 	int	 m_nTimeStamp;
@@ -50,45 +50,38 @@ public:
     int MergeFilesToMp4(string fileName);
 
     int MergeFilesToMp4(int recordtimes);
-    
-    //¿¿¿¿¿¿¿mp4¿¿
+
     MP4FileHandle CreateMP4File(const char* fileName,int width,int height,int timeScale=90000,int frameRate=25);
 
-    //¿¿¿¿¿¿aac¿¿ ,h264¿¿¿¿mp4¿¿
-    bool WriteAacH264file(MP4FileHandle pFileMp4 ,const char* filename);
-   
-    //¿¿¿¿H264
+    int WriteAacH264file(MP4FileHandle pFileMp4 ,const char* filename);
+
     int WriteH264Tag(MP4FileHandle hMp4File,const unsigned char* pData,int size, int timestramp);
-   	
-    //¿¿¿¿Aac
+
     int WriteAAcTag(MP4FileHandle hMp4File,const unsigned char *pData,int size,int timestramp);
-	
-    //¿¿mp4¿¿
+
     void CloseMP4File(MP4FileHandle hMp4File);
   
 private:
-	
-    //¿¿AAC ADTS¿¿?    
+
+    //MP4Encoder Init;
+    void MP4EncoderInit();
+
 	int GetADTSInit(int nSampleRate, int nChannal, int bitsPerSample);
-  
-    //¿¿ADTS¿¿?¿¿MP4AudioTrackId¿¿
+
     void GetADTSInfo(unsigned char *aacheadbuff, int buffsize, int &nAudioSampleRate, int &channelConfiguration ,int &cnt);
    
 private:
 
    /*ÅäÖÃÎÄ¼þ*/
    CConfigFileReader *config_file;
-   
-   //¿¿¿¿pps¿sps¿¿
+
    bool spsflag;
    bool ppsflag;
 
-   //MP4¿¿¿¿
    MP4FileHandle  pFileMp4;
 
    int m_firstStamp;
 
-   //¿¿ TrackId¿¿¿¿?   
    int m_nWidth;   
    int m_nHeight;
    int m_nFrameRate;
@@ -97,9 +90,7 @@ private:
 
    bool firstH264Tag;
    RTMPFrame  m_VLastFrame;
- 
-   
-   //¿¿ TrackId¿¿¿¿?   
+
    bool aacfirst;
    int nAudioSampleRate;
    MP4TrackId m_audioId;
@@ -126,14 +117,9 @@ private:
    string m_filepath;
    string m_liveId;
    int recordTimes;
-   
-   int LastVedioTimestamp;
-   int LastAudioTimestamp;
-   int LasWhiteTimestamp;
-					   
-   int totalVedioTimestamp;
-   int totalAudioTimestamp;
-   int totalWhiteTimestamp;
 
    int recordTime;
+
+   unsigned char *h264Tagbuffer;
+   unsigned char *aacTagbuffer;
 };

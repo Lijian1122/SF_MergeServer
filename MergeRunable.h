@@ -1,3 +1,16 @@
+/*****************************************************
+版权所有:北京三海教育科技有限公司
+作者：lijian
+版本：V0.0.1
+时间：2018-09-18
+功能：合成文件任务类，把某一liveId文件夹下所有的aac , h264合成MP4文件
+
+v 0.0.2
+2019.01.22 完成合成功能
+
+v 0.0.3
+2019.07.05 增加调用mp4v2库,裸码流合成mp4
+******************************************************/
 #ifndef MERGERUNABLE_H
 #define MERGERUNABLE_H
 
@@ -43,6 +56,7 @@ private:
    int ParseJsonInfo(std::string &jsonStr ,std::string &resCodeInfo);
 
 private:
+
    std::map<int, string> m_AacMap;
    std::map<int, string> m_H264Map;
    std::map<int, string> m_JsonMap;
@@ -55,8 +69,9 @@ private:
 
    /*配置文件*/
    CConfigFileReader *config_file;
-   int recordTimes;
 
+   /*录制次数*/
+   int recordTimes;
 };
 
 #endif // MERGERUNABLE_H
