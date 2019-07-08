@@ -13,7 +13,7 @@ MergeRunable::MergeRunable(std::string liveID)
      m_JsonMap.clear();
 }
 
-/*int MergeRunable::run()
+int MergeRunable::run()
 {
     int rescode = 0;
     m_mp4encoder = new MP4Encoder(MergeFilePath,m_liveId);
@@ -41,9 +41,9 @@ MergeRunable::MergeRunable(std::string liveID)
         LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<" 失败"<< "  rescode:"<<rescode<<"实例化合成对象失败！";
     }
     return rescode;
-}*/
+}
 
-int MergeRunable::run()
+/*int MergeRunable::run()
 {
     int rescode = 0;
     m_mp4encoder = new MP4Encoder(MergeFilePath,m_liveId);
@@ -88,7 +88,7 @@ int MergeRunable::run()
     }
 
     return rescode;
-}
+}*/
 
 //更新合成状态
 int MergeRunable::UpdataMergeflag(int flag)
