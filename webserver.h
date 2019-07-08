@@ -61,7 +61,8 @@ enum RESCODE{
    NO_ERROR = 0, 
    LIVEID_ERROR,
    METHOD_ERROR,
-   MALLOC_ERROR 
+   MALLOC_ERROR,
+   URL_ERROR 
 };
 
 //定时器任务类型

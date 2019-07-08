@@ -1,1 +1,0 @@
-/usr/bin/c++   -O0 -Wall -std=c++11  -fPIC -Wno-deprecated  -Wunused-value  -Wno-write-strings -g -ggdb  -rdynamic CMakeFiles/mergeMonitor.dir/mergeMonitor.cpp.o  -o /home/SF_MergeServer/mergeMonitor /home/SF_MergeServer/libs/libbase.a -lglog -lcurl -lpthread 

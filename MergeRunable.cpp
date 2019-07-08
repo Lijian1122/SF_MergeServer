@@ -27,7 +27,7 @@ MergeRunable::MergeRunable(std::string liveID)
                 LOG(ERROR) << "执行任务 liveID:" << m_liveId << " 失败" << "  rescode:" << rescode;
             } else {
                 LOG(INFO) << "执行任务 liveID:" << m_liveId << "  合成成功" << "  rescode:" << rescode;
-                printf("执行任务 liveID:%s  合成成功 rescode:%d", m_liveId.c_str(), rescode);
+                printf("执行任务 liveID:%s  合成成功 rescode:%d\n", m_liveId.c_str(), rescode);
             }
         } else {
              rescode = 1;  //无文件 设置状态为 1
@@ -71,7 +71,7 @@ int MergeRunable::run()
                   } else {
                       LOG(INFO) << "执行任务 liveID:" << m_liveId << "  合成成功" << "  rescode:" << rescode << "   fileName:"
                                  << fileName;
-                      printf("执行任务 liveID:%s  合成成功  rescode:%d  fileName:%s", m_liveId.c_str(), rescode, fileName.c_str());
+                      printf("执行任务 liveID:%s  合成成功  rescode:%d  fileName:%s\n", m_liveId.c_str(), rescode, fileName.c_str());
                   }
               }
           } else {
