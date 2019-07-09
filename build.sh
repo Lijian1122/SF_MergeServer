@@ -44,15 +44,31 @@ build(){
 clean(){
    cd Base
    make clean
+   rm -rf CMakeCache.txt
+   rm -rf CMakeFiles
+   rm cmake_install.cmake
+   rm Makefile
 
    cd ../Mutexmp4
    make clean
+   rm -rf CMakeCache.txt
+   rm -rf CMakeFiles
+   rm cmake_install.cmake
+   rm Makefile
 
    cd ../Monitor
    make clean
+   rm -rf CMakeCache.txt
+   rm -rf CMakeFiles
+   rm cmake_install.cmake
+   rm Makefile
    
    cd ..
    make clean
+   rm -rf CMakeCache.txt
+   rm -rf CMakeFiles
+   rm cmake_install.cmake
+   rm Makefile
 }
 
 case $1 in

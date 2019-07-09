@@ -1,3 +1,0 @@
-/home/SF_MergeServer/Mutexmp4/CMakeFiles/rebuild_cache.dir
-/home/SF_MergeServer/Mutexmp4/CMakeFiles/edit_cache.dir
-/home/SF_MergeServer/Mutexmp4/CMakeFiles/muxermp4.dir
