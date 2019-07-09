@@ -41,6 +41,7 @@ ${PROJECT_SOURCE_DIR}/../libs
 TARGET_LINK_LIBRARIES(muxermp4
                       ${LIB_PATH}
                       base
+                      glog
                       g7112aac
                       pthread
                       )
