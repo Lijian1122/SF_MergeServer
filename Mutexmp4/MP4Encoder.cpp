@@ -14,6 +14,8 @@ MP4Encoder::MP4Encoder(string &filepath, string &liveId)
      config_file = NULL;
 
      MP4EncoderInit();
+
+     testTag = 0;
 }
 
 void MP4Encoder::MP4EncoderInit()
@@ -55,6 +57,7 @@ int MP4Encoder::MergeFilesToMp4(string fileName)
      string mp4name = fileName + MP4STR;
      pFileMp4 = CreateMP4File(mp4name.c_str(),352,288);
      if(pFileMp4){
+        LOG(ERROR) << "开始合成 liveId:"<<m_liveId<<"  fileName:"<<fileName;
         retcode = WriteAacH264file(pFileMp4, fileName.c_str());
      }else{
         printf(" CreateMP4File filed liveId:%s  fileName:%s\n", m_liveId.c_str() ,fileName.c_str());
@@ -67,7 +70,7 @@ int MP4Encoder::MergeFilesToMp4(string fileName)
 
 int MP4Encoder::MergeFilesToMp4(int recordtimes)
 {
-    int retcode = 0;
+    int retcode = 1;
     int recordTimes = recordtimes;
 		 
     string mp4name = m_filepath + m_liveId + "/"  + m_liveId + MP4STR;
@@ -95,12 +98,15 @@ int MP4Encoder::MergeFilesToMp4(int recordtimes)
             } else {
                 fileName = m_filepath + m_liveId + "/" + m_liveId;
             }
+
+            printf("开始合成 fileName:%s\n", fileName.c_str());  
+            LOG(ERROR) << "开始合成 liveId:"<<m_liveId<<"  fileName:"<<fileName;
             retcode = WriteAacH264file(pFileMp4, fileName.c_str());
-            if (0 != retcode){
-                //printf("merge filed fileName:%s\n", fileName.c_str());
-                LOG(ERROR) << "merge filed liveId:"<<m_liveId<<"  fileName:"<<fileName;
-            }else {
-                LOG(INFO) << "merge succeed liveId:"<<m_liveId<<"  fileName:"<<fileName;
+            if (1 != retcode){
+                //printf("合成失败 fileName:%s\n", fileName.c_str());
+                LOG(ERROR) << "合成失败 liveId:"<<m_liveId<<"  fileName:"<<fileName;
+            }else{
+                LOG(ERROR) << "合成成功 liveId:"<<m_liveId<<"  fileName:"<<fileName;
                 printf("merge succeed fileName:%s\n", fileName.c_str());
             }
         }
@@ -119,6 +125,7 @@ MP4FileHandle MP4Encoder::CreateMP4File(const char *pFileName,int width,int heig
    {
      return false;
    }
+
    //createmp4file
    MP4FileHandle hMp4file=MP4Create(pFileName);
    if(hMp4file==MP4_INVALID_FILE_HANDLE)
@@ -135,7 +142,7 @@ MP4FileHandle MP4Encoder::CreateMP4File(const char *pFileName,int width,int heig
    return hMp4file;
 }
 
-int MP4Encoder::WriteH264Tag(MP4FileHandle hMp4File,const unsigned char* pData,int size, int timeStramp)
+int MP4Encoder::WriteH264Tag(MP4FileHandle hMp4File,const unsigned char* pData,int size, long timeStramp)
 {
    if(hMp4File == NULL)
    {
@@ -187,8 +194,8 @@ int MP4Encoder::WriteH264Tag(MP4FileHandle hMp4File,const unsigned char* pData,i
 	 
      if(!firstH264Tag)
      {
-	      m_firstStamp = timeStramp;
-	      firstH264Tag = true;
+	 m_firstStamp = timeStramp;
+	 firstH264Tag = true;
      }else
      {       
             int uFrameMS = timeStramp - m_VLastFrame.m_nTimeStamp;
@@ -202,10 +209,11 @@ int MP4Encoder::WriteH264Tag(MP4FileHandle hMp4File,const unsigned char* pData,i
 
      m_VLastFrame.m_bKeyFrame = firstH264Tag;
 	
-     if(uDuration > 10000)
+     if(uDuration > 20000 || uDuration < 0)
      {
-           printf("h264 uDuration:%d  lastTimeStramp:%d  timeStramp :%d :\n", uDuration, m_VLastFrame.m_nTimeStamp,timeStramp);
-           LOG(WARNING) << " h264 uDuration:"<<uDuration<<"   lastTimeStramp"<< m_VLastFrame.m_nTimeStamp<<"    timeStramp:"<<timeStramp<< " liveId:"<<m_liveId;
+           //printf("h264 uDuration:%ld  lastTimeStramp:%ld  timeStramp :%ld :\n", uDuration, m_VLastFrame.m_nTimeStamp,timeStramp);
+           LOG(WARNING) << " h264 uDuration:"<<uDuration<<"   lastTimeStramp: "<< m_VLastFrame.m_nTimeStamp<<"    timeStramp:"<<timeStramp<< 
+                        " liveId:"<<m_liveId;
      }
     
      m_VLastFrame.m_nTimeStamp = timeStramp;
@@ -231,7 +239,7 @@ int MP4Encoder::WriteH264Tag(MP4FileHandle hMp4File,const unsigned char* pData,i
 }
 
 
-int MP4Encoder::WriteAAcTag(MP4FileHandle hMp4File,const unsigned char* pBufferG711,int nG711Len,int timeStramp)
+int MP4Encoder::WriteAAcTag(MP4FileHandle hMp4File,const unsigned char* pBufferG711,int nG711Len,long timeStramp)
 {
      if(hMp4File == NULL)
      {
@@ -249,58 +257,65 @@ int MP4Encoder::WriteAAcTag(MP4FileHandle hMp4File,const unsigned char* pBufferG
      } else 
      {
          int uFrameMS = timeStramp - m_ALastFrame.m_nTimeStamp;
-         uDuration  = (80000/1000)*uFrameMS;
+         uDuration  = (m_nSampleRate/1000)*uFrameMS;
 
          //}
          //int uFrameMS = timeStramp - m_ALastFrame.m_nTimeStamp;
          //uDuration  = (m_nSampleRate/1000)*uFrameMS;
 		 
-		 if(uDuration < 0 || uDuration == 0)
-		 {
-		    uDuration = 80000/1000;
-		 }
+          if(uDuration < 0) //uDuration  == 0
+	  {
+		    uDuration = m_nSampleRate/1000;
+	  }
      }
 
      m_ALastFrame.m_bKeyFrame = firstAacTag;
 
-    if(uDuration > 10000)
+    if(uDuration > 20000 || uDuration < 0)
     {
-          printf("aac uDuration:%d  lastTimeStramp:%d  timeStramp :%d :\n", uDuration, m_ALastFrame.m_nTimeStamp,timeStramp);
-          LOG(WARNING) << " aac uDuration:"<<uDuration<<"   lastTimeStramp"<< m_VLastFrame.m_nTimeStamp<<"    timeStramp:"<<timeStramp<< " liveId:"<<m_liveId;
+          //printf("aac uDuration:%ld  lastTimeStramp:%ld  timeStramp :%ld :\n", uDuration, m_ALastFrame.m_nTimeStamp,timeStramp);
+          LOG(WARNING) << " aac uDuration:"<<uDuration<<"   lastTimeStramp"<< m_VLastFrame.m_nTimeStamp<<"    timeStramp:"<<timeStramp<< 
+                          " liveId:"<<m_liveId;
     }
-     m_ALastFrame.m_nTimeStamp = timeStramp;
+    m_ALastFrame.m_nTimeStamp = timeStramp;
     
-     if(!firstAacTag)
-     {
-          MP4WriteSample(hMp4File, m_audioId, pBufferG711, nG711Len,80000/1000 , 0, 1);
-     }else
-     {
-          MP4WriteSample(hMp4File, m_audioId, pBufferG711, nG711Len, uDuration, 0, 1);      
-     }
-     return 0;
+    if(!firstAacTag)
+    {
+         MP4WriteSample(hMp4File, m_audioId, pBufferG711, nG711Len,m_nSampleRate/1000 , 0, 1);
+    }else
+    {
+         MP4WriteSample(hMp4File, m_audioId, pBufferG711, nG711Len, uDuration, 0, 1);      
+    }
+    return 0;
 }
 
 
 void MP4Encoder::CloseMP4File(MP4FileHandle hMp4File)
 {
    if(hMp4File)
-   {
-      MP4Close(hMp4File);
-      hMp4File=NULL;
+   {      
+     printf("开始关闭mp4句柄\n");
+     LOG(INFO) << "MP4Encoder::CloseMP4File 开始关闭mp4句柄 liveId:"<<m_liveId;
+
+     MP4Close(pFileMp4, MP4_CLOSE_DO_NOT_COMPUTE_BITRATE);
+     pFileMp4 = NULL;
+
+     printf("已经关闭mp4句柄\n");
+     LOG(INFO) << "MP4Encoder::CloseMP4File 已经关闭mp4句柄 liveId:"<<m_liveId;
    }
 }
 
 int MP4Encoder::WriteAacH264file(MP4FileHandle pFileMp4, const char* file)
 {
-      int resCode = 0;
+      int resCode = 1;
       if(!h264Tagbuffer)
       {
           h264Tagbuffer=(unsigned char *)malloc(BUFFER_SIZE);
           if(!h264Tagbuffer)
           {
-              printf("ERROR: malloc h264Tagbuffer failed!");
+              printf("ERROR: malloc h264Tagbuffer failed!\n");
               LOG(ERROR) << "WriteAacH264file malloc h264Tagbuffer failed liveId:"<<m_liveId;
-              resCode = -1;
+              resCode = 2;
               return resCode;
           }
       }
@@ -310,9 +325,9 @@ int MP4Encoder::WriteAacH264file(MP4FileHandle pFileMp4, const char* file)
         aacTagbuffer=(unsigned char *)malloc(BUFFER_SIZE);
         if(!aacTagbuffer)
         {
-            printf("ERROR: malloc aacTagbuffer failed!");
+            printf("ERROR: malloc aacTagbuffer failed!\n");
             LOG(ERROR) << "WriteAacH264file malloc aacTagbuffer failed liveId:"<<m_liveId;
-            resCode = -2;
+            resCode = 3;
             return resCode;
         }
     }
@@ -322,83 +337,94 @@ int MP4Encoder::WriteAacH264file(MP4FileHandle pFileMp4, const char* file)
     FILE*fp264=fopen(h264name.c_str(),"rb");
     if(!fp264)
     {
-        printf("ERROR: open h264 file failed!");
+        printf("ERROR: open h264 file failed!\n");
         LOG(ERROR) << "WriteAacH264file open h264 file failed liveId:"<<m_liveId;
-        resCode = 2;
+        resCode = 4;
+        fclose(fp264);
         return resCode;
     }
 	  
     fseek(fp264, 0L, SEEK_END);
     int h264filelen = ftell(fp264);
     fseek(fp264, 0L, SEEK_SET);
-    //unsigned char *buffer = (unsigned char *)malloc(BUFFER_SIZE);
     if(h264filelen == 0)
     {
-        printf("ERROR: h264 file is empty");
+        printf("ERROR: h264 file is empty\n");
         LOG(ERROR) << "WriteAacH264file h264 file is empty liveId:"<<m_liveId;
-        resCode = 3;
+        resCode = 5;
+        fclose(fp264);
         return resCode;
     }
     
-	  char h264headbuff[4] = {0};
-	  int H264TAGSIZE = 4;
-	 
-	  int h264DataSize = 0;
-	  int h264WriteTotal = 0;
-	  int h264timestramp = 0;
+    char h264headbuff[4] = {0};
+    int H264TAGSIZE = 4;
+    int h264DataSize = 0;
+    int h264WriteTotal = 0;
+    long h264timestramp = 0;
 	  
-      string aacname = file;
-      aacname = aacname.append(AACSTR);
-      FILE*fpaac=fopen(aacname.c_str(),"rb");
-      if(!fpaac)
-      {
-           printf("ERROR: open aac file failed!");
-           LOG(ERROR) << "WriteAacH264file open aac file liveId:"<<m_liveId;
-           resCode = 4;
-           return resCode;
-      }
-      fseek(fpaac, 0L, SEEK_END); 
-      int aacfilelen = ftell(fpaac);
-      if(aacfilelen == 0)
-      {
-           printf("ERROR: aac file is empty");
-           LOG(ERROR) << "WriteAacH264file aac file is empty liveId:"<<m_liveId;
-           resCode = 5;
-           return resCode;
-      }
-      fseek(fpaac, 0L, SEEK_SET);
-      int aacWriteTotal = 0; 
-	  int ADTSHEADSIZE = 7;
-	  int aacdataSize = 0;
-	  int cnt = 0;
-	  int aactimestramp = 0;
-	  int nAudioSampleRate = 0;
-	  int channelConfiguration = 0; 
-	  unsigned char aacheadbuff[7] = {0};
-	  //unsigned char *aacframe=(unsigned char *)malloc(BUFFER_SIZE);
-	  
-	  bool h264flag = true;
-	  bool aacflag = true;
-	 
-	  bool h264over = false;
-	  bool accover = false;
+    string aacname = file;
+    aacname = aacname.append(AACSTR);
+    FILE*fpaac=fopen(aacname.c_str(),"rb");
+    if(!fpaac)
+    {
+        printf("ERROR: open aac file failed!\n");
+        LOG(ERROR) << "WriteAacH264file open aac file liveId:"<<m_liveId;
+        resCode = 6; 
+        fclose(fp264);
+        fclose(fpaac);
 
-	  while((h264over && accover) == false)
+        return resCode;
+    }
+    fseek(fpaac, 0L, SEEK_END); 
+    int aacfilelen = ftell(fpaac);
+    if(aacfilelen == 0)
+    {
+           printf("ERROR: aac file is empty\n");
+           LOG(ERROR) << "WriteAacH264file aac file is empty liveId:"<<m_liveId;
+           resCode = 7;
+           fclose(fp264);
+           fclose(fpaac);
+
+           return resCode;
+    }
+    fseek(fpaac, 0L, SEEK_SET);
+    int aacWriteTotal = 0; 
+    int ADTSHEADSIZE = 7;
+    int aacdataSize = 0;
+    int cnt = 0;
+    long aactimestramp = 0;
+    int nAudioSampleRate = 0;
+    int channelConfiguration = 0; 
+    unsigned char aacheadbuff[7] = {0};
+    //unsigned char *aacframe=(unsigned char *)malloc(BUFFER_SIZE);
+	  
+    bool h264flag = true;
+    bool aacflag = true;
+	 
+    bool h264over = false;
+    bool accover = false;
+
+      while((h264over && accover) == false)
       {	  
 		  if(h264flag)
 		  {
-			   if(h264WriteTotal < h264filelen)
-			   {
-                  memset(h264headbuff,0,H264TAGSIZE);
-                  h264DataSize = 0; 
+		      if(h264WriteTotal < h264filelen)
+		      {
+                          memset(h264headbuff,0,H264TAGSIZE);
+                          h264DataSize = 0; 
 		          int data_size = fread(h264headbuff,1,H264TAGSIZE,fp264);            
 		          if(data_size < H264TAGSIZE)
-		          {                 
+		          {   
+                                  printf("h264文件 已经读不到H264TAGSIZE 数据长度\n");
+                                  LOG(ERROR) << "h264文件 已经读不到H264TAGSIZE 数据长度,已读数据长度:"<<h264WriteTotal<<"  文件数据总长度:"<<h264filelen<<
+                                           " 文件名:"<<h264name;
+      
+                                  h264WriteTotal = h264filelen;              
 			          h264over = true;
 			          if(accover)
 			          {
 				          break;                                    
-				      }
+				  }
 			          continue;
 		          }
 		          h264WriteTotal += H264TAGSIZE;   
@@ -410,7 +436,12 @@ int MP4Encoder::WriteAacH264file(MP4FileHandle pFileMp4, const char* file)
 		          data_size = fread(h264Tagbuffer,1,h264DataSize,fp264);
 		          if(data_size < h264DataSize)
 		          {
-		              h264over = true;
+		       
+                                  printf("h264文件 已经读不到H264 一帧数据长度\n");
+                                  LOG(ERROR)<< "h264文件 已经读不到H264一帧数据长度,已读数据长度:"<<h264WriteTotal<<"  文件数据总长度:"<<h264filelen<<
+                                           " 文件名:"<<h264name;
+                                  h264WriteTotal = h264filelen;
+                                  h264over = true;
 			          if(accover)
 			          {
 				         break;
@@ -418,18 +449,36 @@ int MP4Encoder::WriteAacH264file(MP4FileHandle pFileMp4, const char* file)
 			          continue;
 		          }			
 		          h264WriteTotal += h264DataSize;
-                          //printf("%#X %#X %#X %#X\n",buffer[0], buffer[1], buffer[2], buffer[3]);
-                          memcpy(&h264timestramp, h264Tagbuffer, 3);
-                          h264timestramp = HTON24(h264timestramp);
-		          if(h264WriteTotal > h264filelen || h264WriteTotal == h264filelen)
-                  {
-                       h264over = true;
-                       unsigned char *h264databuff = h264Tagbuffer+4;
+                          //printf("%#X %#X %#X %#X\n",h264Tagbuffer[0], h264Tagbuffer[1], h264Tagbuffer[2], h264Tagbuffer[3]);
+                          int extendsize = h264Tagbuffer[3];
+                          h264timestramp = 0;
+                          if(extendsize > 0)
+                          {
+                              char timestramp[4] = {0};
+                              timestramp[0] = h264Tagbuffer[3];
+                              memcpy(timestramp+1, h264Tagbuffer,3);
+
+                              memcpy(&h264timestramp, timestramp,4);
+                              h264timestramp = HTON32(h264timestramp);                             
+                          }else
+                          {
+                              memcpy(&h264timestramp, h264Tagbuffer,3);
+                              h264timestramp = HTON24(h264timestramp);
+                          }
+		         if(h264WriteTotal > h264filelen || h264WriteTotal == h264filelen)
+                         {
+                               h264over = true;
+                               unsigned char *h264databuff = h264Tagbuffer+4;
                        
 		               WriteH264Tag(pFileMp4,h264databuff,h264DataSize - 4,h264timestramp);
-                       //printf("zui hou yige h246 xieru: %d\n",h264DataSize - 4); 
-                  }  
-		          //printf("h264 huoqudaode shijiancuo:%d %d %d \n",h264timestramp,h264WriteTotal, h264filelen);
+                               printf("zui hou yige h246 xieru: %d\n",h264DataSize - 4); 
+                            
+                               LOG(INFO) << "最后一个h264Tag写入,  时间戳:"<<h264timestramp<<"  fileName:"<<h264name;
+                               LOG(INFO) << "已读数据长度："<<h264WriteTotal<<"  数据总长度："<<h264filelen;
+                               
+                         }  
+		         //printf("h264 获取时间戳:%d  已读数据:%d 总数据:%d \n",h264timestramp,h264WriteTotal, h264filelen);  
+                         //printf("h264 huoqudaode shijiancuo:%d %d %d \n",h264timestramp,h264WriteTotal, h264filelen);                     					       
 			 }else
              {
 				 h264over = true;
@@ -441,23 +490,27 @@ int MP4Encoder::WriteAacH264file(MP4FileHandle pFileMp4, const char* file)
 			{
 			    memset(aacheadbuff,0,ADTSHEADSIZE);
                               
-                int data_size = fread(aacheadbuff, 1,ADTSHEADSIZE , fpaac);
-                if(data_size < ADTSHEADSIZE)
-                {
-                    accover = true;
-		            if(h264over)
-		            {
-		             	break;
-	                }
-		            continue;
-                }
+                            int data_size = fread(aacheadbuff, 1,ADTSHEADSIZE , fpaac);
+                            if(data_size < ADTSHEADSIZE)
+                            {
+                               printf("aac文件 已经读不到ADTSHEAD 数据长度\n");
+                               LOG(ERROR)<< "aac文件 已经读不到ADTSHEAD 数据长度,已读数据长度:"<<aacWriteTotal<<"  文件数据总长度:"<<aacfilelen<<
+                                           " 文件名:"<<aacname;
+                               accover = true;
+                               aacWriteTotal = aacfilelen;
+		               if(h264over)
+		               { 
+		             	 break;
+	                       }
+		               continue;
+                           } 
                
 		        aacdataSize = 0;  
-                aacdataSize |= (aacheadbuff[3] & 0x03) <<11;     //high 2 bit
-                aacdataSize |= (aacheadbuff[4])<<3;                //middle 8 bit
-                aacdataSize |= (aacheadbuff[5] & 0xe0)>>5;     //low 3bit
+                        aacdataSize |= (aacheadbuff[3] & 0x03) <<11;     //high 2 bit
+                        aacdataSize |= (aacheadbuff[4])<<3;                //middle 8 bit
+                        aacdataSize |= (aacheadbuff[5] & 0xe0)>>5;     //low 3bit
 				
-	            aacWriteTotal += ADTSHEADSIZE;				
+	                aacWriteTotal += ADTSHEADSIZE;				
 		        //GetADTSInfo(aacheadbuff,aacdataSize,nAudioSampleRate,channelConfiguration,cnt);
 			
 	            if(cnt == 0 && recordTime == 0)
@@ -476,78 +529,116 @@ int MP4Encoder::WriteAacH264file(MP4FileHandle pFileMp4, const char* file)
                 data_size = fread(aacTagbuffer,1,aacdataSize-7,fpaac);
                 if(data_size < aacdataSize - 7)
                 {
+              
+                     printf("aac文件 已经读不到aac 一帧长度\n");
+                     LOG(ERROR)<< "aac文件 已经读不到aac 一帧长度,已读数据长度:"<<aacWriteTotal<<"  文件数据总长度:"<<aacfilelen<<
+                                           " 文件名:"<<aacname;
                      accover = true;
-		             if(h264over)
-	                 {
-			             break;
-		             }
-		             continue;
-                }
-                aacWriteTotal += data_size;
+                     aacWriteTotal = aacfilelen;
+		     if(h264over)
+	             {
+			  break;
+		     }
+		     continue;
+	         }
+                     aacWriteTotal += data_size;
 				
-                //printf("%#X %#X %#X %#X\n",aacframe[0], aacframe[1], aacframe[2], aacframe[3]);
-		        memcpy(&aactimestramp, aacTagbuffer, 3);
-                aactimestramp = HTON24(aactimestramp);
+                //printf("%#X %#X %#X %#X\n",aacTagbuffer[0], aacTagbuffer[1], aacTagbuffer[2], aacTagbuffer[3]);
+                int extendsize = aacTagbuffer[3];
+                aactimestramp = 0;
+                if(extendsize > 0)
+                {
+                       char timestramp[4] = {0};
+                       timestramp[0] = aacTagbuffer[3];
+                       memcpy(timestramp+1, aacTagbuffer,3);
+
+                       memcpy(&aactimestramp, timestramp,4);
+                       aactimestramp = HTON32(aactimestramp);
+                             
+                }else
+                {
+		               memcpy(&aactimestramp, aacTagbuffer, 3);
+                       aactimestramp = HTON24(aactimestramp);
+                }
 				
                 //aactimestramp =aactimestramp + totalAudioTimestamp;
-                //printf("aac huoqudaode shijiancuo:%d %d %d\n",aactimestramp, aacWriteTotal, aacfilelen);
+                // printf("aac huoqudaode shijiancuo:%d %d %d\n",aactimestramp, aacWriteTotal, aacfilelen);
                 if(aacWriteTotal > aacfilelen || aacWriteTotal == aacfilelen)
                 {
                      accover = true;
                      unsigned char *aacdatabuff = aacTagbuffer+4;
-		             WriteAAcTag(pFileMp4,aacdatabuff, aacdataSize - 11,aactimestramp);
+		         
+                     printf("zui hou yige aac xieru: %d\n",aacdataSize - 11); 
+                     printf("aac huoqudaode shijiancuo:%d %d %d\n",aactimestramp, aacWriteTotal, aacfilelen);
+
+		     WriteAAcTag(pFileMp4,aacdatabuff, aacdataSize - 11,aactimestramp);
+                      
+                     LOG(INFO) << "最后一个aacTag写入,  时间戳:"<<aactimestramp<<"  fileName:"<<aacname;
+                     //LOG(INFO) << "已读数据长度："<<aacWriteTotal<<"  数据总长度："<<aacfilelen;
+					 
+		     /*if(h264over)
+		     {
+			break;
+	             }*/                
+                      
                 }         
-			}else
-               {
+	      }else{
 				accover = true;
 				if(h264over)
 				{
 					break;
 				}
-			}				
-		}
+		   }				
+	     }
 		
 		if(!h264over && !accover)
 		{
 		    if(h264timestramp < aactimestramp || h264timestramp == aactimestramp )
 		    {
 			       unsigned char *h264databuff = h264Tagbuffer+4;
-		           WriteH264Tag(pFileMp4,h264databuff,h264DataSize - 4,h264timestramp);
-                   //printf("h264 xieru: %d\n",h264DataSize - 4);      
+		               WriteH264Tag(pFileMp4,h264databuff,h264DataSize - 4,h264timestramp);
+                               //printf("h264 xieru: %d\n",h264DataSize - 4);                          
 			       aacflag = false;
 			       h264flag = true;
 		    }else
-		    {
-         
-                   unsigned char *aacdatabuff = aacTagbuffer+4;
+		    {                   
+                               unsigned char *aacdatabuff = aacTagbuffer+4;
 			       WriteAAcTag(pFileMp4,aacdatabuff,aacdataSize - 11,aactimestramp);
-                   //printf("aac xieru: %d\n",aacdataSize - 4); 
+                               //printf("aac xieru: %d\n",aacdataSize - 4); 
 			       h264flag = false;
-                   aacflag = true;
+                               aacflag = true;
 		    }
 	   }else
 	   { 
            if(accover && h264over)
            {
+               printf("333 aac: %d , h246:%d", accover, h264over);
+               LOG(INFO) << "h264文件，aac文件都已读完："<<h264name<<"  "<<aacname;
                break;
                  
            }else if(accover && !h264over)
 	       {
 		           unsigned char *h264databuff = h264Tagbuffer+4;
 		           WriteH264Tag(pFileMp4,h264databuff,h264DataSize - 4, h264timestramp);
-                   //printf("aac wanle h246 xieru: %d\n",h264DataSize - 4);     
+                           //printf("aac wanle h246 xieru: %d\n",h264DataSize - 4);
+                           LOG(INFO) << "aac文件已读完: "<<aacname<<"  h264文件还需写入:"<<h264name<<"  "<<h264DataSize - 4;
 		           aacflag = false;
-                   h264flag = true;     
+                           h264flag = true;     
 	       }else if(h264over && !accover)
 	       {                    
                    unsigned char *aacdatabuff = aacTagbuffer+4;
-		           WriteAAcTag(pFileMp4,aacdatabuff, aacdataSize - 11,aactimestramp);
-                   //printf("h264 wanle aac xieru: %d\n",aacdataSize - 11);    
-		           h264flag = false;
+		   WriteAAcTag(pFileMp4,aacdatabuff, aacdataSize - 11,aactimestramp);
+                   printf("h264 wanle aac xieru: %d\n",aacdataSize - 11);
+
+                   LOG(INFO) << "h264文件已读完: "<<h264name<<"  aac文件还需写入:"<<aacname<<"  "<<aacdataSize - 11;
+		   h264flag = false;
                    aacflag = true;	
-	        }
-      }      
+	       }
+      }
     }
+
+    printf("文件已经读完\n");
+    LOG(INFO) << "h264文件已读完: "<<h264name<<"  aac文件也已经读完:"<<aacname;
 	
     fclose(fp264);
     fclose(fpaac);
@@ -610,7 +701,8 @@ void MP4Encoder::GetADTSInfo(unsigned char *aacheadbuff, int size, int &nAudioSa
 
 int MP4Encoder::GetADTSInit(int nSampleRate,int nChannal,int bitsPerSample)
 {
-       m_nSampleRate = nSampleRate;
+       //m_nSampleRate = nSampleRate;
+       m_nSampleRate  = 80000;
        m_nAudioChannal = nChannal;
        m_nBitsPerSample = bitsPerSample;
        m_nInputSamples = 0;
@@ -653,7 +745,7 @@ int MP4Encoder::GetADTSInit(int nSampleRate,int nChannal,int bitsPerSample)
     faacEncSetConfiguration( m_hEncoder, pConfiguration);
 
     // 2.2 add audio track m_nSampleRate
-    m_audioId = MP4AddAudioTrack(pFileMp4,80000,1024,MP4_MPEG4_AUDIO_TYPE);
+    m_audioId = MP4AddAudioTrack(pFileMp4,m_nSampleRate,1024,MP4_MPEG4_AUDIO_TYPE);
     MP4SetAudioProfileLevel(pFileMp4, 0x02);
 
     //2.4 get decoder info

@@ -41,7 +41,7 @@ typedef struct _MP4ENC_NaluUnit
 
 typedef struct _RTMPFrame {
 	bool m_bKeyFrame;
-	int	 m_nTimeStamp;
+	long	 m_nTimeStamp;
 }RTMPFrame;
 
 
@@ -67,10 +67,10 @@ public:
     int WriteAacH264file(MP4FileHandle pFileMp4 ,const char* filename);
 
 	//把一帧H264写入mp4文件
-    int WriteH264Tag(MP4FileHandle hMp4File,const unsigned char* pData,int size, int timestramp);
+    int WriteH264Tag(MP4FileHandle hMp4File,const unsigned char* pData,int size, long timestramp);
 
 	//把一帧AAC写入mp4文件
-    int WriteAAcTag(MP4FileHandle hMp4File,const unsigned char *pData,int size,int timestramp);
+    int WriteAAcTag(MP4FileHandle hMp4File,const unsigned char *pData,int size,long timestramp);
 
 	//关闭mp4文件句柄
     void CloseMP4File(MP4FileHandle hMp4File);
@@ -141,4 +141,6 @@ private:
    /*h264tag和aacTag的缓冲区*/
    unsigned char *h264Tagbuffer;
    unsigned char *aacTagbuffer;
+
+   int testTag;
 };
