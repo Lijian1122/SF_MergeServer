@@ -1,0 +1,39 @@
+Log file created at: 2019/07/16 18:38:17
+Running on machine: live2.sanhai
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E0716 18:38:17.292132  6821 webserver.cpp:162] 接口返回数据异常 ret:-1  错误信息:
+### Error updating database.  Cause: java.sql.SQLIntegrityConstraintViolationException: Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'
+### The error may involve com.dbr.eduLive.Dao.ServiceDao.serverInsert-Inline
+### The error occurred while setting parameters
+### SQL: insert into server_info    (      netFlag    ,     serverType    ,     serverName    ,     serverApi    )    values    (      ?    ,     ?    ,     ?    ,     ?    )
+### Cause: java.sql.SQLIntegrityConstraintViolationException: Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'
+; SQL []; Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'; nested exception is java.sql.SQLIntegrityConstraintViolationException: Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'
+E0716 18:38:17.293756  6821 webserver.cpp:392] 解析注册录制 数据失败 main_ret:-1
+I0716 18:38:17.303488  6825 webserver.cpp:196] 合成服务已启动 on port:8082
+I0716 18:38:17.310672  6821 CThreadPool.cpp:101] 线程池已启动 10 个线程
+I0716 18:38:17.311321  6821 webserver.cpp:458] server start: main_ret:0
+I0716 18:38:31.986876  6825 webserver.cpp:24] Get Url:/muxer/mergefile
+I0716 18:38:31.987047  6825 webserver.cpp:55] 解析参数 livID:100120190330gEdVJz8U
+I0716 18:38:31.987241  6826 webserver.cpp:102] 管理线程获取参数 直播ID:100120190330gEdVJz8U
+I0716 18:38:31.987462  6836 CThreadPool.cpp:49]  开始执行任务 liveID:100120190330gEdVJz8U
+E0716 18:38:31.988827  6836 MP4Encoder.cpp:60] 开始合成 liveId:100120190330gEdVJz8U  fileName:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U
+I0716 18:38:32.011119  6836 MP4Encoder.cpp:476] 最后一个h264Tag写入,  时间戳:271417  fileName:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.h264
+I0716 18:38:32.011168  6836 MP4Encoder.cpp:477] 已读数据长度：1523609  数据总长度：1523609
+I0716 18:38:32.011193  6836 MP4Encoder.cpp:633] h264文件已读完: /recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.h264  aac文件还需写入:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.aac  160
+I0716 18:38:32.011238  6836 MP4Encoder.cpp:633] h264文件已读完: /recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.h264  aac文件还需写入:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.aac  168
+I0716 18:38:32.011281  6836 MP4Encoder.cpp:633] h264文件已读完: /recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.h264  aac文件还需写入:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.aac  165
+I0716 18:38:32.011353  6836 MP4Encoder.cpp:633] h264文件已读完: /recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.h264  aac文件还需写入:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.aac  159
+I0716 18:38:32.011368  6836 MP4Encoder.cpp:633] h264文件已读完: /recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.h264  aac文件还需写入:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.aac  172
+I0716 18:38:32.011391  6836 MP4Encoder.cpp:633] h264文件已读完: /recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.h264  aac文件还需写入:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.aac  157
+I0716 18:38:32.011427  6836 MP4Encoder.cpp:576] 最后一个aacTag写入,  时间戳:271452  fileName:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.aac
+I0716 18:38:32.011440  6836 MP4Encoder.cpp:616] h264文件，aac文件都已读完：/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.h264  /recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.aac
+I0716 18:38:32.011456  6836 MP4Encoder.cpp:641] h264文件已读完: /recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.h264  aac文件也已经读完:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U.aac
+I0716 18:38:32.011490  6836 MP4Encoder.cpp:298] MP4Encoder::CloseMP4File 开始关闭mp4句柄 liveId:100120190330gEdVJz8U
+I0716 18:38:32.013222  6836 MP4Encoder.cpp:304] MP4Encoder::CloseMP4File 已经关闭mp4句柄 liveId:100120190330gEdVJz8U
+I0716 18:38:32.013254  6836 MergeRunable.cpp:75] 执行任务 liveID:100120190330gEdVJz8U  合成成功  rescode:1   fileName:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U
+E0716 18:38:32.013283  6836 MergeRunable.cpp:95] rescode :1
+I0716 18:38:32.013322  6836 MergeRunable.cpp:118] UpdataMergeUrl:http://192.168.1.205:8080/live/live_update?liveId=100120190330gEdVJz8U&mixFlag=1&operateId=test
+I0716 18:38:32.103153  6825 webserver.cpp:24] Get Url:/favicon.ico
+E0716 18:38:32.103252  6825 webserver.cpp:66] Methond ERROR
+I0716 18:38:33.108503  6836 MergeRunable.cpp:142] 执行任务 liveID:100120190330gEdVJz8U  上传合成状态成功
+I0716 18:38:33.108765  6836 CThreadPool.cpp:57]  执行任务 liveID:100120190330gEdVJz8U  完成

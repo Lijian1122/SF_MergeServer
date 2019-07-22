@@ -1,5 +1,6 @@
-monitor_Server :[tid: 19394]
-http://192.168.1.205:8080/live/server_create/live/server_delete/live/server_select/live/live_update
+Log file created at: 2019/07/22 10:00:18
+Running on machine: live2.sanhai
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
 E0722 10:00:18.080775 19394 webserver.cpp:162] 接口返回数据异常 ret:-1  错误信息:
 ### Error updating database.  Cause: java.sql.SQLIntegrityConstraintViolationException: Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'
 ### The error may involve com.dbr.eduLive.Dao.ServiceDao.serverInsert-Inline
@@ -8,7 +9,6 @@ E0722 10:00:18.080775 19394 webserver.cpp:162] 接口返回数据异常 ret:-1  
 ### Cause: java.sql.SQLIntegrityConstraintViolationException: Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'
 ; SQL []; Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'; nested exception is java.sql.SQLIntegrityConstraintViolationException: Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'
 E0722 10:00:18.082276 19394 webserver.cpp:392] 解析注册录制 数据失败 main_ret:-1
-注册服务： http://192.168.1.205:8080/live/server_create?serverName=LIVE%E5%90%88%E6%88%90&serverType=LiveMuxer&serverApi=http://192.168.1.206:8082/muxer/mergefile
-I will create 10 threads.
-server starting
-time url:http://192.168.1.205:8080/live/server_update?serverId=&netFlag=1
+I0722 10:00:18.083719 19394 CThreadPool.cpp:101] 线程池已启动 10 个线程
+I0722 10:00:18.083853 19394 webserver.cpp:458] server start: main_ret:0
+I0722 10:00:18.084230 19395 webserver.cpp:196] 合成服务已启动 on port:8082

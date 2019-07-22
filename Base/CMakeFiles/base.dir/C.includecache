@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/SF_MergeServer/Base/MessageQueue.c
+MessageQueue.h
+/home/SF_MergeServer/Base/MessageQueue.h
+
+/home/SF_MergeServer/Base/MessageQueue.h
+string.h
+-
+stdio.h
+-
+sys/types.h
+-
+unistd.h
+-
+sys/ipc.h
+-
+sys/msg.h
+-
+
