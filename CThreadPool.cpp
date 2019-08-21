@@ -22,16 +22,15 @@ void *CThreadPool::MergeFileThread()
         pthread_mutex_lock(&m_pthreadMutex);
 		
         //如果队列为空，等待新任务进入任务队列	
-		if(m_vecTaskList.size() == 0)
-		{ 
-			pthread_cond_wait(&m_pthreadCond, &m_pthreadMutex);
-			
-			if(m_vecTaskList.size() == 0)
-			{
-				pthread_mutex_lock(&m_pthreadMutex);
-				continue;		
-			}
-		}
+	if(m_vecTaskList.size() == 0)
+	{ 
+	    pthread_cond_wait(&m_pthreadCond, &m_pthreadMutex);		
+	    if(m_vecTaskList.size() == 0)
+	    {
+		pthread_mutex_lock(&m_pthreadMutex);
+		continue;		
+	    }
+	}
 		      
         printf("[tid: %lu]\trun: ", tid);
         vector<MergeRunable*>::iterator iter = m_vecTaskList.begin();
@@ -78,11 +77,13 @@ void *CThreadPool::ThreadFunc(void* arg)
 
 //往任务队列里添加任务并发出线程同步信号
 int CThreadPool::AddTask(MergeRunable *task) 
-{ 
+{
+    LOG(INFO)<<"线程池开始添加任务 liveID: "<<task->getLiveID(); 
     pthread_mutex_lock(&m_pthreadMutex);   
     m_vecTaskList.push_back(task);  
     pthread_mutex_unlock(&m_pthreadMutex);  
     pthread_cond_signal(&m_pthreadCond);
+    LOG(INFO)<<"线程池添加任务结束 liveID: "<<task->getLiveID();
     return 0;
 }
 

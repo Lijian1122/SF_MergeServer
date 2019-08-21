@@ -33,10 +33,10 @@ void ev_handler(struct mg_connection *nc, int ev, void *ev_data)
 
 		        if(parmlen == 0 ||  parmlen > 1024) //判断url长度是否非法
 		        {
-                     LOG(ERROR)<<"Url Error";
-                     ret = RESCODE::URL_ERROR;
-                     goto end;
-                 }
+                             LOG(ERROR)<<"Url 长度太长或太短";
+                            ret = RESCODE::URL_ERROR;
+                            goto end;
+                        }
                  char liveId_buf[1024] = {0};
 
                  mg_get_http_var(&hm->query_string, "liveId", liveId_buf, parmlen);//获取liveID

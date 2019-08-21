@@ -80,10 +80,10 @@ private:
     //MP4Encoder初始化
     void MP4EncoderInit();
 
-	//根据获取音频属性,初始化AudioTrack
-	int GetADTSInit(int nSampleRate, int nChannal, int bitsPerSample);
+    //根据获取音频属性,初始化AudioTrack
+    int GetADTSInit(int nSampleRate, int nChannal, int bitsPerSample);
 
-	//解析ADTS,获取音频属性
+    //解析ADTS,获取音频属性
     void GetADTSInfo(unsigned char *aacheadbuff, int buffsize, int &nAudioSampleRate, int &channelConfiguration ,int &cnt);
    
 private:

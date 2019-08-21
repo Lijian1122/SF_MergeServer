@@ -100,9 +100,9 @@ int MergeRunable::run()
 //更新合成状态
 int MergeRunable::UpdataMergeflag(int flag)
 {
+    LOG(INFO)<<"开始更新合成状态 liveID:"<<m_liveId;
     LibcurClient  m_httpclient;
     std::string resCodeInfo;
-
    
     std::string urlparm = IpPort + liveUpdate + "?liveId=";
    
@@ -121,6 +121,8 @@ int MergeRunable::UpdataMergeflag(int flag)
     std::string resData = m_httpclient.GetResdata();
     m_ret = ParseJsonInfo(resData, resCodeInfo);
 
+    LOG(INFO)<<"更新合成状态结束  m_ret:"<<m_ret<<"  liveID:"<<m_liveId;
+
     return m_ret;
 }
 
@@ -129,6 +131,8 @@ int MergeRunable::ParseJsonInfo(std::string &jsonStr ,std::string &resCodeInfo)
 {
     int main_ret = 0;
     std::cout<<"parse json:"<<jsonStr<<endl;
+
+    LOG(INFO)<<"开始解析合成返回数据  jsonStr:"<<jsonStr<<"  liveID:"<<m_liveId;
     if(!jsonStr.empty())
     {
         json m_object = json::parse(jsonStr);
@@ -155,6 +159,7 @@ int MergeRunable::ParseJsonInfo(std::string &jsonStr ,std::string &resCodeInfo)
          LOG(ERROR)<<"执行任务 liveID:"<<m_liveId<<" 返回http 接口数据为空!";
          main_ret = 2;
      }
+     LOG(INFO)<<"解析合成返回数据完成  main_ret:"<<main_ret<<"  liveID:"<<m_liveId;
      return main_ret;
 }
 
@@ -167,6 +172,8 @@ int MergeRunable::searchFile()
     //获取文件路径
     m_liveIdSize = m_liveId.size();
     std::string m_path =  MergeFilePath + m_liveId;
+
+    LOG(INFO)<<"获取文件路径为  m_path:"<<m_path<<"  liveID:"<<m_liveId;
     
     if((dir=opendir(m_path.c_str())) == NULL)
     {
@@ -180,14 +187,17 @@ int MergeRunable::searchFile()
         {
            string fileName = ptr->d_name;
 		   
-	       if(string::npos != fileName.find(AACSTR))
+	   if(string::npos != fileName.find(AACSTR))
            {
+                  LOG(INFO)<<"找到AAC文件为  fileName:"<<fileName<<"  liveID:"<<m_liveId;
                   setFileNameToMap(m_AacMap,fileName,AACSTR);
            }else if(string::npos != fileName.find(H264STR))
            {
+                  LOG(INFO)<<"找到H264文件为  fileName:"<<fileName<<"  liveID:"<<m_liveId;
                   setFileNameToMap(m_H264Map , fileName,H264STR);
            }else if(string::npos != fileName.find(JSONSTR))
            {
+                  LOG(INFO)<<"找到JSON文件为  fileName:"<<fileName<<"  liveID:"<<m_liveId;
                   setFileNameToMap(m_JsonMap,fileName,JSONSTR);
            }     
        } 
@@ -213,13 +223,14 @@ int MergeRunable::searchFile()
 int MergeRunable::setFileNameToMap(std::map<int, string> &Map , std::string &fileName , std::string &fileType)
 {
 
+   int ret = 0;
    string format = fileName;
    format = format.erase(0,m_liveIdSize);
    if(fileType == format)
    {
-     cout<<0<<"  "<<fileName<<endl;
-     Map.insert(std::pair<int,string>(0,fileName));
-     return 0;
+        cout<<0<<"  "<<fileName<<endl;
+        LOG(INFO)<<"把文件插入map fileName:"<<fileName <<"  fileType"<<fileType<< "   liveID:"<<m_liveId;
+        Map.insert(std::pair<int,string>(0,fileName));
    }else
    {
      int found = fileName.find_first_of("(");
@@ -227,21 +238,24 @@ int MergeRunable::setFileNameToMap(std::map<int, string> &Map , std::string &fil
      if(foundstr != m_liveId)
      {
          LOG(ERROR)<<"执行任务 liveID:"<<fileName<<"  filename is not matching folder";
-         return 1;
-     }
+         ret = 1;
+     }else
+     {
    
-     //找到文件序号，按照录制的时间先后插入map
-     format = format.erase(0,2);
-     std::size_t pos = format.find(fileType);
-     int size = fileType.size();
-     format = format.erase(pos,size);
+        //找到文件序号，按照录制的时间先后插入map
+        format = format.erase(0,2);
+        std::size_t pos = format.find(fileType);
+        int size = fileType.size();
+        format = format.erase(pos,size);
 
-     format.pop_back();
-     int number = atoi(format.c_str() );
-     cout<<number<<"  "<<fileName<<endl;
-     Map.insert(std::pair<int,string>(number,fileName));
+        format.pop_back();
+        int number = atoi(format.c_str() );
+        cout<<number<<"  "<<fileName<<endl;
+        LOG(INFO)<<"把文件插入map fileName:"<<fileName <<"  fileType"<<fileType<<"  number:"<<number<<" liveID:"<<m_liveId;
+        Map.insert(std::pair<int,string>(number,fileName));
+     }
    }
-   return 0;
+   return ret;
 }
 
 int MergeRunable::mergeFile(std::map<int, string> &Map, std::string filetype)

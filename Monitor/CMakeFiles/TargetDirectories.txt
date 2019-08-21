@@ -1,3 +1,0 @@
-/home/SF_MergeServer/Monitor/CMakeFiles/rebuild_cache.dir
-/home/SF_MergeServer/Monitor/CMakeFiles/edit_cache.dir
-/home/SF_MergeServer/Monitor/CMakeFiles/mergeMonitor.dir

@@ -1,14 +1,252 @@
-monitor_Server :[tid: 19394]
+monitor_Server :[tid: 17737]
 http://192.168.1.205:8080/live/server_create/live/server_delete/live/server_select/live/live_update
-E0722 10:00:18.080775 19394 webserver.cpp:162] 接口返回数据异常 ret:-1  错误信息:
-### Error updating database.  Cause: java.sql.SQLIntegrityConstraintViolationException: Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'
-### The error may involve com.dbr.eduLive.Dao.ServiceDao.serverInsert-Inline
-### The error occurred while setting parameters
-### SQL: insert into server_info    (      netFlag    ,     serverType    ,     serverName    ,     serverApi    )    values    (      ?    ,     ?    ,     ?    ,     ?    )
-### Cause: java.sql.SQLIntegrityConstraintViolationException: Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'
-; SQL []; Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'; nested exception is java.sql.SQLIntegrityConstraintViolationException: Duplicate entry 'LIVE合成-http://192.168.1.206:8082/muxer/mergefile' for key 'IDX_server_info_np'
-E0722 10:00:18.082276 19394 webserver.cpp:392] 解析注册录制 数据失败 main_ret:-1
 注册服务： http://192.168.1.205:8080/live/server_create?serverName=LIVE%E5%90%88%E6%88%90&serverType=LiveMuxer&serverApi=http://192.168.1.206:8082/muxer/mergefile
+serverID: 907
 I will create 10 threads.
 server starting
-time url:http://192.168.1.205:8080/live/server_update?serverId=&netFlag=1
+time url:http://192.168.1.205:8080/live/server_update?serverId=907&netFlag=1
+合成服务已启动 on port: 8082
+url参数长度：27  liveId=100120190330gEdVJz8U
+[tid: 139920318039808]	run: 0  100120190330gEdVJz8U.aac
+0  100120190330gEdVJz8U.h264
+0  100120190330gEdVJz8U.json
+1  100120190330gEdVJz8U(+1).aac
+1  100120190330gEdVJz8U(+1).h264
+1  100120190330gEdVJz8U(+1).json
+E0730 13:43:04.367532 17740 MP4Encoder.cpp:60] 开始合成 liveId:100120190330gEdVJz8U  fileName:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U
+E0730 13:43:04.532785 17740 MP4Encoder.cpp:60] 开始合成 liveId:100120190330gEdVJz8U  fileName:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U(+1)
+E0730 13:43:05.516366 17740 MergeRunable.cpp:95] rescode :1
+E0730 13:43:05.845774 17738 webserver.cpp:66] Methond ERROR
+    0|     Main|   44100Hz| 0x2 |   200|
+zui hou yige h246 xieru: 656
+zui hou yige aac xieru: 159
+aac huoqudaode shijiancuo:2689158 20258035 20258035
+333 aac: 1 , h246:1文件已经读完
+开始关闭mp4句柄
+已经关闭mp4句柄
+执行任务 liveID:100120190330gEdVJz8U  合成成功  rescode:1  fileName:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U
+    0|     Main|   44100Hz| 0x2 |   175|
+zui hou yige h246 xieru: 958
+zui hou yige aac xieru: 170
+aac huoqudaode shijiancuo:3558405 26810120 26810120
+333 aac: 1 , h246:1文件已经读完
+开始关闭mp4句柄
+已经关闭mp4句柄
+执行任务 liveID:100120190330gEdVJz8U  合成成功  rescode:1  fileName:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U(+1)
+parse json:{"msg":"ok","code":"0","timestamp":"1564465386"}
+[tid: 139920318039808]	idle 0
+url参数长度：27  liveId=100120190729oDVXaRCK
+[tid: 139920236607232]	run: 0  100120190729oDVXaRCK.aac
+0  100120190729oDVXaRCK.h264
+0  100120190729oDVXaRCK.json
+E0730 13:43:17.622066 17741 MP4Encoder.cpp:60] 开始合成 liveId:100120190729oDVXaRCK  fileName:/recordServer/branch/SF_RecordServer/File/100120190729oDVXaRCK/100120190729oDVXaRCK
+E0730 13:43:18.256465 17741 MergeRunable.cpp:95] rescode :1
+E0730 13:43:18.629839 17738 webserver.cpp:66] Methond ERROR
+    0|     Main|   44100Hz| 0x2 |   161|
+zui hou yige h246 xieru: 1755
+zui hou yige aac xieru: 197
+aac huoqudaode shijiancuo:11772128 88806748 88806748
+333 aac: 1 , h246:1文件已经读完
+开始关闭mp4句柄
+已经关闭mp4句柄
+执行任务 liveID:100120190729oDVXaRCK  合成成功  rescode:1  fileName:/recordServer/branch/SF_RecordServer/File/100120190729oDVXaRCK/100120190729oDVXaRCK
+parse json:{"msg":"ok","code":"0","timestamp":"1564465399"}
+[tid: 139920236607232]	idle 0
+url参数长度：53  liveId=100120190330gEdVJz8U&tdsourcetag=s_pcqq_aiomsg
+[tid: 139920228214528]	run: 0  100120190330gEdVJz8U.aac
+0  100120190330gEdVJz8U.h264
+0  100120190330gEdVJz8U.json
+1  100120190330gEdVJz8U(+1).aac
+1  100120190330gEdVJz8U(+1).h264
+1  100120190330gEdVJz8U(+1).json
+E0730 15:30:43.361601 17742 MP4Encoder.cpp:60] 开始合成 liveId:100120190330gEdVJz8U  fileName:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U
+E0730 15:30:43.530359 17742 MP4Encoder.cpp:60] 开始合成 liveId:100120190330gEdVJz8U  fileName:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U(+1)
+E0730 15:30:44.345216 17742 MergeRunable.cpp:95] rescode :1
+E0730 15:30:45.247326 17738 webserver.cpp:66] Methond ERROR
+    0|     Main|   44100Hz| 0x2 |   200|
+zui hou yige h246 xieru: 656
+zui hou yige aac xieru: 159
+aac huoqudaode shijiancuo:2689158 20258035 20258035
+333 aac: 1 , h246:1文件已经读完
+开始关闭mp4句柄
+已经关闭mp4句柄
+执行任务 liveID:100120190330gEdVJz8U  合成成功  rescode:1  fileName:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U
+    0|     Main|   44100Hz| 0x2 |   175|
+zui hou yige h246 xieru: 958
+zui hou yige aac xieru: 170
+aac huoqudaode shijiancuo:3558405 26810120 26810120
+333 aac: 1 , h246:1文件已经读完
+开始关闭mp4句柄
+已经关闭mp4句柄
+执行任务 liveID:100120190330gEdVJz8U  合成成功  rescode:1  fileName:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U/100120190330gEdVJz8U(+1)
+parse json:{"msg":"ok","code":"0","timestamp":"1564471845"}
+[tid: 139920228214528]	idle 0
+url参数长度：27  liveId=100120190730UqvDN27F
+[tid: 139920219821824]	run: 0  100120190730UqvDN27F.aac
+0  100120190730UqvDN27F.h264
+0  100120190730UqvDN27F.json
+E0731 10:11:48.328889 17743 MP4Encoder.cpp:60] 开始合成 liveId:100120190730UqvDN27F  fileName:/recordServer/branch/SF_RecordServer/File/100120190730UqvDN27F/100120190730UqvDN27F
+E0731 10:11:48.499703 17738 webserver.cpp:66] Methond ERROR
+E0731 10:11:49.637490 17743 MergeRunable.cpp:95] rescode :1
+    0|     Main|   44100Hz| 0x2 |   147|
+zui hou yige h246 xieru: 628
+zui hou yige aac xieru: 142
+aac huoqudaode shijiancuo:18063941 136191883 136191883
+333 aac: 1 , h246:1文件已经读完
+开始关闭mp4句柄
+已经关闭mp4句柄
+执行任务 liveID:100120190730UqvDN27F  合成成功  rescode:1  fileName:/recordServer/branch/SF_RecordServer/File/100120190730UqvDN27F/100120190730UqvDN27F
+parse json:{"msg":"ok","code":"0","timestamp":"1564539110"}
+[tid: 139920219821824]	idle 0
+url参数长度：27  liveId=100120190730UqvDN27F
+[tid: 139920211429120]	run: 0  100120190730UqvDN27F.aac
+0  100120190730UqvDN27F.h264
+0  100120190730UqvDN27F.json
+E0731 12:03:18.327178 17744 MP4Encoder.cpp:60] 开始合成 liveId:100120190730UqvDN27F  fileName:/recordServer/branch/SF_RecordServer/File/100120190730UqvDN27F/100120190730UqvDN27F
+E0731 12:03:18.392227 17738 webserver.cpp:66] Methond ERROR
+E0731 12:03:19.260066 17744 MergeRunable.cpp:95] rescode :1
+    0|     Main|   44100Hz| 0x2 |   147|
+zui hou yige h246 xieru: 628
+zui hou yige aac xieru: 142
+aac huoqudaode shijiancuo:18063941 136191883 136191883
+333 aac: 1 , h246:1文件已经读完
+开始关闭mp4句柄
+已经关闭mp4句柄
+执行任务 liveID:100120190730UqvDN27F  合成成功  rescode:1  fileName:/recordServer/branch/SF_RecordServer/File/100120190730UqvDN27F/100120190730UqvDN27F
+parse json:{"msg":"ok","code":"0","timestamp":"1564545800"}
+[tid: 139920211429120]	idle 0
+url参数长度：27  liveId=100120190730UqvDN27F
+[tid: 139920203036416]	run: 0  100120190730UqvDN27F.aac
+0  100120190730UqvDN27F.h264
+0  100120190730UqvDN27F.json
+E0731 12:03:22.850527 17745 MP4Encoder.cpp:60] 开始合成 liveId:100120190730UqvDN27F  fileName:/recordServer/branch/SF_RecordServer/File/100120190730UqvDN27F/100120190730UqvDN27F
+E0731 12:03:22.903980 17738 webserver.cpp:66] Methond ERROR
+E0731 12:03:23.782596 17745 MergeRunable.cpp:95] rescode :1
+    0|     Main|   44100Hz| 0x2 |   147|
+zui hou yige h246 xieru: 628
+zui hou yige aac xieru: 142
+aac huoqudaode shijiancuo:18063941 136191883 136191883
+333 aac: 1 , h246:1文件已经读完
+开始关闭mp4句柄
+已经关闭mp4句柄
+执行任务 liveID:100120190730UqvDN27F  合成成功  rescode:1  fileName:/recordServer/branch/SF_RecordServer/File/100120190730UqvDN27F/100120190730UqvDN27F
+url参数长度：27  liveId=100120190730UqvDN27F
+[tid: 139920194643712]	run: 0  100120190730UqvDN27F.aac
+0  100120190730UqvDN27F.h264
+0  100120190730UqvDN27F.json
+E0731 12:03:24.853778 17738 webserver.cpp:66] Methond ERROR
+parse json:{"msg":"ok","code":"0","timestamp":"1564545804"}
+E0731 12:03:25.398528 17746 MP4Encoder.cpp:60] 开始合成 liveId:100120190730UqvDN27F  fileName:/recordServer/branch/SF_RecordServer/File/100120190730UqvDN27F/100120190730UqvDN27F
+[tid: 139920203036416]	idle 0
+    0|     Main|   44100Hz| 0x2 |   147|
+url参数长度：27  liveId=100120190730UqvDN27F
+[tid: 139920186251008]	run: 0  100120190730UqvDN27F.aac
+0  100120190730UqvDN27F.h264
+0  100120190730UqvDN27F.json
+E0731 12:03:26.186786 17738 webserver.cpp:66] Methond ERROR
+E0731 12:03:26.845554 17747 MP4Encoder.cpp:60] 开始合成 liveId:100120190730UqvDN27F  fileName:/recordServer/branch/SF_RecordServer/File/100120190730UqvDN27F/100120190730UqvDN27F
+E0731 12:03:27.774701 17747 MergeRunable.cpp:95] rescode :1
+    0|     Main|   44100Hz| 0x2 |   147|
+zui hou yige h246 xieru: 628
+zui hou yige aac xieru: 142
+aac huoqudaode shijiancuo:18063941 136191883 136191883
+333 aac: 1 , h246:1文件已经读完
+开始关闭mp4句柄
+zui hou yige h246 xieru: 628
+zui hou yige aac xieru: 142
+aac huoqudaode shijiancuo:18063941 136191883 136191883
+333 aac: 1 , h246:1文件已经读完
+开始关闭mp4句柄
+已经关闭mp4句柄
+执行任务 liveID:100120190730UqvDN27F  合成成功  rescode:1  fileName:/recordServer/branch/SF_RecordServer/File/100120190730UqvDN27F/100120190730UqvDN27F
+url参数长度：27  liveId=100120190730UqvDN27F
+[tid: 139920177858304]	run: 0  100120190730UqvDN27F.aac
+0  100120190730UqvDN27F.h264
+0  100120190730UqvDN27F.json
+E0731 12:03:28.493198 17746 MergeRunable.cpp:95] rescode :1
+E0731 12:03:28.518870 17738 webserver.cpp:66] Methond ERROR
+已经关闭mp4句柄
+执行任务 liveID:100120190730UqvDN27F  合成成功  rescode:1  fileName:/recordServer/branch/SF_RecordServer/File/100120190730UqvDN27F/100120190730UqvDN27F
+parse json:{"msg":"ok","code":"0","timestamp":"1564545808"}
+E0731 12:03:29.066037 17748 MP4Encoder.cpp:60] 开始合成 liveId:100120190730UqvDN27F  fileName:/recordServer/branch/SF_RecordServer/File/100120190730UqvDN27F/100120190730UqvDN27F
+[tid: 139920186251008]	idle 0
+    0|     Main|   44100Hz| 0x2 |   147|
+parse json:{"msg":"ok","code":"0","timestamp":"1564545809"}
+E0731 12:03:29.982501 17748 MergeRunable.cpp:95] rescode :1
+[tid: 139920194643712]	idle 0
+zui hou yige h246 xieru: 628
+zui hou yige aac xieru: 142
+aac huoqudaode shijiancuo:18063941 136191883 136191883
+333 aac: 1 , h246:1文件已经读完
+开始关闭mp4句柄
+已经关闭mp4句柄
+执行任务 liveID:100120190730UqvDN27F  合成成功  rescode:1  fileName:/recordServer/branch/SF_RecordServer/File/100120190730UqvDN27F/100120190730UqvDN27F
+parse json:{"msg":"ok","code":"0","timestamp":"1564545811"}
+[tid: 139920177858304]	idle 0
+url参数长度：30  liveId=100120190330gEdVJz8U666
+[tid: 139920169465600]	run: 0  100120190330gEdVJz8U666.aac
+0  100120190330gEdVJz8U666.h264
+0  100120190330gEdVJz8U666.json
+E0801 09:58:22.624409 17749 MP4Encoder.cpp:60] 开始合成 liveId:100120190330gEdVJz8U666  fileName:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U666/100120190330gEdVJz8U666
+E0801 09:58:22.821882 17738 webserver.cpp:66] Methond ERROR
+E0801 09:58:59.919685 17749 MergeRunable.cpp:95] rescode :1
+    0|     Main|   44100Hz| 0x2 |   172|
+zui hou yige h246 xieru: 1568
+zui hou yige aac xieru: 170
+aac huoqudaode shijiancuo:50496673 380941217 380941217
+333 aac: 1 , h246:1文件已经读完
+开始关闭mp4句柄
+已经关闭mp4句柄
+执行任务 liveID:100120190330gEdVJz8U666  合成成功  rescode:1  fileName:/recordServer/branch/SF_RecordServer/File/100120190330gEdVJz8U666/100120190330gEdVJz8U666
+parse json:{"msg":"ok","code":"0","timestamp":"1564624740"}
+E0801 09:59:28.061988 17738 webserver.cpp:66] Methond ERROR
+E0801 09:59:28.159574 17738 webserver.cpp:66] Methond ERROR
+E0809 17:08:34.043416 17750 webserver.cpp:172] Http接口返回 数据为空
+E0809 17:08:34.078547 17750 webserver.cpp:256] 解析定时返回数据失败  main_ret:-2
+E0809 17:08:44.083251 17750 webserver.cpp:172] Http接口返回 数据为空
+E0809 17:08:44.083446 17750 webserver.cpp:256] 解析定时返回数据失败  main_ret:-2
+E0809 17:08:54.087520 17750 webserver.cpp:172] Http接口返回 数据为空
+E0809 17:08:54.087692 17750 webserver.cpp:256] 解析定时返回数据失败  main_ret:-2
+E0809 17:09:04.091656 17750 webserver.cpp:172] Http接口返回 数据为空
+E0809 17:09:04.091827 17750 webserver.cpp:256] 解析定时返回数据失败  main_ret:-2
+E0809 17:09:14.095809 17750 webserver.cpp:172] Http接口返回 数据为空
+E0809 17:09:14.095999 17750 webserver.cpp:256] 解析定时返回数据失败  main_ret:-2
+E0809 17:09:24.099640 17750 webserver.cpp:172] Http接口返回 数据为空
+E0809 17:09:24.099814 17750 webserver.cpp:256] 解析定时返回数据失败  main_ret:-2
+E0821 13:52:54.262636 17740 MergeRunable.cpp:180] 执行任务 liveID:100120190330gEdVJz8U  打开文件路径失败
+E0821 13:52:54.262728 17740 MergeRunable.cpp:84] 执行任务 liveID:100120190330gEdVJz8U  录制文件为空!!!
+E0821 13:52:54.262800 17740 MergeRunable.cpp:95] rescode :8
+[tid: 139920169465600]	idle 0
+url参数长度：27  liveId=100120190330gEdVJz8U
+[tid: 139920318039808]	run: parse json:{"msg":"ok","code":"0","timestamp":"1566366774"}
+E0821 13:52:54.608996 17738 webserver.cpp:66] Methond ERROR
+[tid: 139920318039808]	idle 0
+url参数长度：27  liveId=100120190820C9CF2w1g
+[tid: 139920236607232]	run: 0  100120190820C9CF2w1g.aac
+0  100120190820C9CF2w1g.h264
+0  100120190820C9CF2w1g.json
+1  100120190820C9CF2w1g(+1).aac
+1  100120190820C9CF2w1g(+1).h264
+1  100120190820C9CF2w1g(+1).json
+E0821 13:53:11.170783 17741 MP4Encoder.cpp:60] 开始合成 liveId:100120190820C9CF2w1g  fileName:/recordServer/branch/SF_RecordServer/File/100120190820C9CF2w1g/100120190820C9CF2w1g
+E0821 13:53:11.239725 17738 webserver.cpp:66] Methond ERROR
+E0821 13:53:11.287566 17741 MP4Encoder.cpp:60] 开始合成 liveId:100120190820C9CF2w1g  fileName:/recordServer/branch/SF_RecordServer/File/100120190820C9CF2w1g/100120190820C9CF2w1g(+1)
+E0821 13:53:11.306809 17741 MP4Encoder.cpp:551] aac文件 已经读不到aac 一帧长度,已读数据长度:1372123  文件数据总长度:1372160 文件名:/recordServer/branch/SF_RecordServer/File/100120190820C9CF2w1g/100120190820C9CF2w1g(+1).aac
+E0821 13:53:11.306885 17741 MP4Encoder.cpp:458] h264文件 已经读不到H264一帧数据长度,已读数据长度:3907134  文件数据总长度:3907584 文件名:/recordServer/branch/SF_RecordServer/File/100120190820C9CF2w1g/100120190820C9CF2w1g(+1).h264
+E0821 13:53:11.308418 17741 MergeRunable.cpp:95] rescode :1
+    0|     Main|   44100Hz| 0x2 |   186|
+zui hou yige h246 xieru: 1006
+zui hou yige aac xieru: 174
+aac huoqudaode shijiancuo:1871852 14120000 14120000
+333 aac: 1 , h246:1文件已经读完
+开始关闭mp4句柄
+已经关闭mp4句柄
+执行任务 liveID:100120190820C9CF2w1g  合成成功  rescode:1  fileName:/recordServer/branch/SF_RecordServer/File/100120190820C9CF2w1g/100120190820C9CF2w1g
+    0|     Main|   44100Hz| 0x2 |   158|
+aac文件 已经读不到aac 一帧长度
+h264文件 已经读不到H264 一帧数据长度
+文件已经读完
+开始关闭mp4句柄
+已经关闭mp4句柄
+执行任务 liveID:100120190820C9CF2w1g  合成成功  rescode:1  fileName:/recordServer/branch/SF_RecordServer/File/100120190820C9CF2w1g/100120190820C9CF2w1g(+1)
+parse json:{"msg":"ok","code":"0","timestamp":"1566366792"}

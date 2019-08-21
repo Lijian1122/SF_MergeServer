@@ -1,2 +1,0 @@
-/usr/bin/ar qc /home/SF_MergeServer/libs/libmuxermp4.a  CMakeFiles/muxermp4.dir/MP4Encoder.cpp.o
-/usr/bin/ranlib /home/SF_MergeServer/libs/libmuxermp4.a
